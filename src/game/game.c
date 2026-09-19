@@ -1,0 +1,42 @@
+#include "younap.h"
+
+/* Start level.
+ */
+ 
+int game_start_level(int mapid) {
+  fprintf(stderr,"%s(%d)\n",__func__,mapid);
+  
+  /* Acquire resource, validation dimensions, copy cells.
+   */
+  const void *serial;
+  int serialc=res_get(&serial,EGG_TID_map,mapid);
+  if (serialc<1) {
+    fprintf(stderr,"map:%d not found\n",mapid);
+    return -1;
+  }
+  struct map_res res;
+  if (map_res_decode(&res,serial,serialc)<0) return -1;
+  fprintf(stderr,"map:%d: %dx%d cmdc=%d\n",mapid,res.w,res.h,res.cmdc);
+  if ((res.w!=NS_sys_mapw)||(res.h!=NS_sys_maph)) return -1;
+  memcpy(g.cellv,res.v,NS_sys_mapw*NS_sys_maph);
+  
+  /* Read commands.
+   */
+  struct cmdlist_reader reader={.v=res.cmd,.c=res.cmdc};
+  struct cmdlist_entry cmd;
+  while (cmdlist_reader_next(&cmd,&reader)>0) {
+    switch (cmd.opcode) {
+    
+      case CMD_map_sprite: {
+          int x=cmd.arg[0];
+          int y=cmd.arg[1];
+          int spriteid=(cmd.arg[2]<<8)|cmd.arg[3];
+          const uint8_t *arg=cmd.arg+4;
+          fprintf(stderr,"TODO spawn sprite:%d at %d,%d with arg: %02x %02x %02x %02x\n",spriteid,x,y,arg[0],arg[1],arg[2],arg[3]);//TODO
+        } break;
+        
+    }
+  }
+  
+  return 0;
+}
