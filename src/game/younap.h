@@ -10,8 +10,8 @@
 #include "egg_res_toc.h"
 #include "shared_symbols.h"
 
-#define FBW 1024
-#define FBH 576
+#define FBW 960
+#define FBH 480
 
 extern struct g {
   void *rom;
