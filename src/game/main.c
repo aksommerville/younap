@@ -74,7 +74,7 @@ int egg_client_init() {
   
   if (game_start_level(1)<0) return -1;
   
-  egg_play_song(1,RID_song_Noodlecat_Drum_Test,1,1.0,0.0);
+  egg_play_song(1,RID_song_noodlecat,1,1.0,0.0);
 
   return 0;
 }
