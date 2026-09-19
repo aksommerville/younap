@@ -30,6 +30,11 @@ void render_map() {
  */
  
 void render_sunbeams() {
+  struct window *window=g.windowv;
+  int i=g.windowc;
+  for (;i-->0;window++) {
+    graf_fill_rect(&g.graf,window->x*NS_sys_tilesize,window->y*NS_sys_tilesize,window->w*NS_sys_tilesize,window->h*NS_sys_tilesize,0xffff0080);
+  }
   //TODO
 }
 

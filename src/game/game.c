@@ -20,12 +20,28 @@ int game_start_level(int mapid) {
   if ((res.w!=NS_sys_mapw)||(res.h!=NS_sys_maph)) return -1;
   memcpy(g.cellv,res.v,NS_sys_mapw*NS_sys_maph);
   
+  /* Reset some globals.
+   */
+  g.windowc=0;
+  g.sunmidx=NS_sys_mapw*0.5;
+  g.sunmidy=NS_sys_maph;
+  g.sunr=50.0; // not to scale :)
+  g.sunt=0.0;
+  
   /* Read commands.
    */
   struct cmdlist_reader reader={.v=res.cmd,.c=res.cmdc};
   struct cmdlist_entry cmd;
   while (cmdlist_reader_next(&cmd,&reader)>0) {
     switch (cmd.opcode) {
+    
+      case CMD_map_window: if (g.windowc<WINDOW_LIMIT) {
+          struct window *window=g.windowv+g.windowc++;
+          window->x=cmd.arg[0];
+          window->y=cmd.arg[1];
+          window->w=cmd.arg[2];
+          window->h=cmd.arg[3];
+        } break;
     
       case CMD_map_sprite: {
           int x=cmd.arg[0];
@@ -39,4 +55,30 @@ int game_start_level(int mapid) {
   }
   
   return 0;
+}
+
+/* Advance the sun.
+ */
+ 
+void game_advance_sun(double elapsed) {
+  g.sunt+=elapsed*0.200;
+  if (g.sunt>=M_PI) {
+    fprintf(stderr,"END OF DAY\n");//TODO
+    game_start_level(1);
+  }
+}
+
+/* Regenerate spots.
+ */
+ 
+void game_regenerate_spots() {
+  g.spotc=0;
+  
+  /* Arguably, we should project a unique ray for each outside window corner, from the sun's center.
+   * But I think it might be even better to do it naively: All sunbeams have exactly the same angle.
+   * Because in real life, the sun is far away.
+   */
+  double nx=cos(g.sunt);
+  double ny=sin(g.sunt);
+  //TODO
 }
