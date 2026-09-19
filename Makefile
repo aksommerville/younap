@@ -6,6 +6,22 @@ ifeq (,$(EGG_SDK))
 endif
 EGGDEV:=$(EGG_SDK)/out/eggdev
 
+# If EGG_TARGETS was provided via environment, capture it.
+# We're including config.mk for the tool's sake and that will clobber it.
+PRE_EGG_TARGETS:=$(EGG_TARGETS)
+
+# Build a single tool, for any extra build-time processing we need.
+include $(EGG_SDK)/local/config.mk
+PRECMD=echo "  $@" ; mkdir -p $(@D) ;
+TOOLS_CFILES:=$(shell find src/tool $(EGG_SDK)/src/opt/midi $(EGG_SDK)/src/opt/fs $(EGG_SDK)/src/opt/serial -name '*.c')
+TOOLS_OFILES:=$(patsubst $(EGG_SDK)/src/%.c,mid/tool/%.o,$(patsubst src/tool/%.c,mid/tool/%.o,$(TOOLS_CFILES)))
+-include $(TOOLS_OFILES:.o=.d)
+mid/tool/%.o:src/tool/%.c;$(PRECMD) $(eggdev_CC) -o$@ $< -I$(EGG_SDK)/src/
+mid/tool/%.o:$(EGG_SDK)/src/%.c;$(PRECMD) $(eggdev_CC) -o$@ $< -I$(EGG_SDK)/src/
+TOOL_EXE:=out/tool
+$(TOOL_EXE):$(TOOLS_OFILES);$(PRECMD) $(eggdev_LD) -o$@ $^ $(EGG_SDK)/out/$(EGG_NATIVE_TARGET)/libeggrt-headless.a $(eggdev_LDPOST)
+all:$(TOOL_EXE)
+
 all:;$(EGGDEV) build
 clean:;rm -rf mid out
 run:;$(EGGDEV) run
