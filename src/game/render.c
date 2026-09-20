@@ -35,7 +35,15 @@ void render_sunbeams() {
   for (;i-->0;window++) {
     graf_fill_rect(&g.graf,window->x*NS_sys_tilesize,window->y*NS_sys_tilesize,window->w*NS_sys_tilesize,window->h*NS_sys_tilesize,0xffff0080);
   }
-  //TODO
+  
+  uint32_t color=0xffffffff;
+  struct spot *spot=g.spotv;
+  for (i=g.spotc;i-->0;spot++) {
+    graf_line(&g.graf,
+      (int)(spot->xa*NS_sys_tilesize),(int)(spot->y*NS_sys_tilesize),color,
+      (int)(spot->xz*NS_sys_tilesize),(int)(spot->y*NS_sys_tilesize),color
+    );
+  }
 }
 
 /* Sprites.

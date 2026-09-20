@@ -64,12 +64,20 @@ static int midmerge_chid_by_path(const char *path) {
     int tokenc=0;
     while ((basep<basec)&&(base[basep]!='_')&&(base[basep]!='.')) { tokenc++; basep++; }
     basep++;
+    char norm[16];
+    if (tokenc>sizeof(norm)) continue;
+    int i=tokenc;
+    while (i-->0) {
+      if ((token[i]>='A')&&(token[i]<='Z')) norm[i]=token[i]+0x20;
+      else norm[i]=token[i];
+    }
     
-    if ((tokenc==4)&&!memcmp(token,"Bass",4)) return 0;
-    if ((tokenc==4)&&!memcmp(token,"Lead",4)) return 1;
-    if ((tokenc==5)&&!memcmp(token,"Piano",5)) return 2;
-    if ((tokenc==5)&&!memcmp(token,"Drums",5)) return 3;
-    if ((tokenc==3)&&!memcmp(token,"Pad",3)) return 4;
+    if ((tokenc==4)&&!memcmp(norm,"bass",4)) return 0;
+    if ((tokenc==4)&&!memcmp(norm,"lead",4)) return 1;
+    if ((tokenc==5)&&!memcmp(norm,"piano",5)) return 2;
+    if ((tokenc==5)&&!memcmp(norm,"drums",5)) return 3;
+    if ((tokenc==3)&&!memcmp(norm,"pad",3)) return 4;
+    if ((tokenc==5)&&!memcmp(norm,"synth",5)) return 5;
   }
   return -1;
 }
