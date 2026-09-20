@@ -23,10 +23,7 @@ int game_start_level(int mapid) {
   /* Reset some globals.
    */
   g.windowc=0;
-  g.sunmidx=NS_sys_mapw*0.5;
-  g.sunmidy=NS_sys_maph;
-  g.sunr=50.0; // not to scale :)
-  g.sunt=0.0;
+  g.sunp=0.0;
   
   /* Read commands.
    */
@@ -41,6 +38,10 @@ int game_start_level(int mapid) {
           window->y=cmd.arg[1];
           window->w=cmd.arg[2];
           window->h=cmd.arg[3];
+          if ((window->w<1)||(window->h<1)||(window->x+window->w>NS_sys_mapw)||(window->y+window->h>NS_sys_maph)) {
+            fprintf(stderr,"map:%d invalid window (%d,%d,%d,%d)\n",mapid,window->x,window->y,window->w,window->h);
+            return -1;
+          }
         } break;
     
       case CMD_map_sprite: {
@@ -54,16 +55,51 @@ int game_start_level(int mapid) {
     }
   }
   
-  return 0;
-}
-
-/* Advance the sun.
- */
- 
-void advance_sun(double elapsed) {
-  g.sunt+=elapsed*0.200;
-  if (g.sunt>=M_PI) {
-    fprintf(stderr,"END OF DAY\n");//TODO
-    game_start_level(1);
+  /* Find each window's floor.
+   * There must be a solid or oneway cell at (x,y+h) or below.
+   */
+  struct window *window=g.windowv;
+  int i=g.windowc;
+  for (;i-->0;window++) {
+    window->floory=window->y+window->h;
+    for (;;) {
+      if (window->floory>=NS_sys_maph) {
+        fprintf(stderr,"map:%d, window at %d,%d has no floor below.\n",mapid,window->x,window->y);
+        return -1;
+      }
+      uint8_t physics=g.physics[g.cellv[window->floory*NS_sys_mapw+window->x]];
+      if ((physics==NS_physics_solid)||(physics==NS_physics_oneway)) break;
+      window->floory++;
+    }
+    // (beaml,beamr) should be overwritten before the first render. But if not, they're straight down.
+    window->beaml=window->x;
+    window->beamr=window->x+window->w;
+    // Confirm that that floor extends to the diagonals spreading from the window's top.
+    // Not looking for occlusions above -1, because that starts to get complicated.
+    // This is only validation; in theory we could be doing it at build time instead.
+    int dy=window->floory-window->y;
+    int xlo=window->x-dy; // inclusive
+    int xhi=window->x+window->w+dy; // exclusive
+    if ((xlo<0)||(xhi>NS_sys_mapw)) {
+      fprintf(stderr,"map:%d, window at %d,%d exceeds horizontal map edges\n",mapid,window->x,window->y);
+      return -1;
+    }
+    const uint8_t *mbtm=g.cellv+window->floory*NS_sys_mapw+xlo;
+    const uint8_t *mtop=mbtm-NS_sys_mapw;
+    int x=xlo;
+    for (;x<xhi;x++,mbtm++,mtop++) {
+      uint8_t phtop=g.physics[*mtop];
+      uint8_t phbtm=g.physics[*mbtm];
+      if (phtop!=NS_physics_vacant) {
+        fprintf(stderr,"map:%d, window at %d,%d beam is occluded at %d,%d\n",mapid,window->x,window->y,x,window->floory-1);
+        return -1;
+      }
+      if ((phbtm!=NS_physics_solid)&&(phbtm!=NS_physics_oneway)) {
+        fprintf(stderr,"map:%d, window at %d,%d beam runs off a cliff around %d,%d\n",mapid,window->x,window->y,x,window->floory);
+        return -1;
+      }
+    }
   }
+  
+  return 0;
 }

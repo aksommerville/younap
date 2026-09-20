@@ -30,19 +30,40 @@ void render_map() {
  */
  
 void render_sunbeams() {
+
+  // XXX Probably no need to draw highlights on the floor.
+  uint32_t floor_color=0xffffffff;
+  graf_set_input(&g.graf,0);
   struct window *window=g.windowv;
   int i=g.windowc;
+  /**
   for (;i-->0;window++) {
-    graf_fill_rect(&g.graf,window->x*NS_sys_tilesize,window->y*NS_sys_tilesize,window->w*NS_sys_tilesize,window->h*NS_sys_tilesize,0xffff0080);
-  }
-  
-  uint32_t color=0xffffffff;
-  struct spot *spot=g.spotv;
-  for (i=g.spotc;i-->0;spot++) {
     graf_line(&g.graf,
-      (int)(spot->xa*NS_sys_tilesize),(int)(spot->y*NS_sys_tilesize),color,
-      (int)(spot->xz*NS_sys_tilesize),(int)(spot->y*NS_sys_tilesize),color
+      (int)(window->beaml*NS_sys_tilesize),window->floory*NS_sys_tilesize+2,floor_color,
+      (int)(window->beamr*NS_sys_tilesize),window->floory*NS_sys_tilesize+2,floor_color
     );
+  }
+  /**/
+  
+  uint32_t ray_color=0xffff0080;
+  for (window=g.windowv,i=g.windowc;i-->0;window++) {
+    if (window->beaml<window->x) {
+      graf_triangle_strip_begin(&g.graf,
+        window->x*NS_sys_tilesize,window->y*NS_sys_tilesize,ray_color,
+        (int)(window->beaml*NS_sys_tilesize),window->floory*NS_sys_tilesize,ray_color,
+        window->x*NS_sys_tilesize,(window->y+window->h)*NS_sys_tilesize,ray_color
+      );
+      graf_triangle_strip_more(&g.graf,(int)(window->beamr*NS_sys_tilesize),window->floory*NS_sys_tilesize,ray_color);
+      graf_triangle_strip_more(&g.graf,(window->x+window->w)*NS_sys_tilesize,(window->y+window->h)*NS_sys_tilesize,ray_color);
+    } else {
+      graf_triangle_strip_begin(&g.graf,
+        window->x*NS_sys_tilesize,(window->y+window->h)*NS_sys_tilesize,ray_color,
+        (int)(window->beaml*NS_sys_tilesize),window->floory*NS_sys_tilesize,ray_color,
+        (window->x+window->w)*NS_sys_tilesize,(window->y+window->h)*NS_sys_tilesize,ray_color
+      );
+      graf_triangle_strip_more(&g.graf,(int)(window->beamr*NS_sys_tilesize),window->floory*NS_sys_tilesize,ray_color);
+      graf_triangle_strip_more(&g.graf,(window->x+window->w)*NS_sys_tilesize,window->y*NS_sys_tilesize,ray_color);
+    }
   }
 }
 

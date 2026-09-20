@@ -13,7 +13,6 @@
 #define FBW 960
 #define FBH 480
 #define WINDOW_LIMIT 8
-#define SPOT_LIMIT 32
 
 extern struct g {
   void *rom;
@@ -29,25 +28,16 @@ extern struct g {
   int mapid;
   uint8_t cellv[NS_sys_mapw*NS_sys_maph];
   
-  double sunmidx,sunmidy; // Sun's center of rotation in map meters. Probably center of map?
-  double sunr; // Sun's distance from center of ration in meters.
-  double sunt; // Sun's position along its orbit: 0..pi = dawn..dusk
+  double sunp; // 0..1
   
   /* Windows come straight off the map: CMD_map_window.
    */
   struct window {
-    uint8_t x,y,w,h; // In map meters.
+    uint8_t x,y,w,h; // In map meters, from the map command.
+    int floory; // >=y+h, meters, where my sunbeams land.
+    double beaml,beamr; // Meters, left and right extents of my sunbeam. Highly volatile.
   } windowv[WINDOW_LIMIT];
   int windowc;
-  
-  /* Spots are horizontal lines on the floor, warmed by the sun.
-   * Regenerated each update.
-   */
-  struct spot {
-    double y,xa,xz;
-  } spotv[SPOT_LIMIT];
-  int spotc;
-  
 } g;
 
 // main.c
@@ -62,9 +52,9 @@ void render_sprites();
 
 // game.c
 int game_start_level(int mapid);
-void advance_sun(double elapsed); // May start a new level.
 
 // sunlight.c
+void advance_sun(double elapsed); // May start a new level.
 void regenerate_spots();
 
 #endif
