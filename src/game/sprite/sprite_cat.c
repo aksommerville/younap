@@ -2,17 +2,21 @@
 
 #define GRAVITY_ACCEL 30.0 /* m/s**2 */
 #define GRAVITY_LIMIT 10.0 /* m/s */
+#define JUMP_CHARGE   10.0 /* m/s**2 */
+#define JUMP_LIMIT    10.0 /* m/s */
+#define JUMP_MIN       4.0 /* m/s ; what you get if there's exactly one frame of charge */
 #define JUMP_DECEL    20.0 /* m/s**2 */
-#define JUMP_INITIAL  10.0 /* m/s */
 
 struct sprite_cat {
   struct sprite hdr;
   int input; // <0 if i'm not being controlled
   int sleeping;
   int seated;
-  int jump_poison; // If nonzero, you must hit the ground again before jumping.
+  int jumpok; // Can start charging a jump.
+  int jumping; // True during jump, goes false when crested.
+  int charging; // Preparing a jump.
   double gravity; // m/s
-  double jump_power; // m/s
+  double jump_power; // m/s, rises during charge
 };
 
 #define SPRITE ((struct sprite_cat*)sprite)
@@ -29,7 +33,7 @@ static void _cat_del(struct sprite *sprite) {
 static int _cat_init(struct sprite *sprite) {
   SPRITE->input=-1;
   SPRITE->seated=1;
-  SPRITE->jump_power=JUMP_INITIAL;
+  SPRITE->jumpok=1;
   return 0;
 }
 
@@ -85,16 +89,29 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
   
   /* Gravity or jumping.
    */
-  //XXX nope, remember? we're doing charged jumps
-  if (injump&&(SPRITE->jump_power>0.0)) {
+  if (SPRITE->jumping) {
+    SPRITE->jumpok=0;
     SPRITE->jump_power-=JUMP_DECEL*elapsed;
     if (SPRITE->jump_power<=0.0) {
       // peaked
+      SPRITE->jumping=0;
     } else {
       sprite_move(sprite,0.0,-SPRITE->jump_power*elapsed);
       SPRITE->seated=0;
-      SPRITE->jump_poison=1;
     }
+  } else if (SPRITE->charging) {
+    if (!injump) {
+      // Charge=>Jump.
+      SPRITE->charging=0;
+      SPRITE->jumping=1;
+    } else {
+      SPRITE->jump_power+=JUMP_CHARGE*elapsed;
+      if (SPRITE->jump_power>JUMP_LIMIT) SPRITE->jump_power=JUMP_LIMIT;
+    }
+  } else if (SPRITE->jumpok&&injump) {
+    // Begin charging.
+    SPRITE->charging=1;
+    SPRITE->jump_power=JUMP_MIN;
   } else {
     SPRITE->gravity+=elapsed*GRAVITY_ACCEL;
     if (SPRITE->gravity>GRAVITY_LIMIT) SPRITE->gravity=GRAVITY_LIMIT;
@@ -104,8 +121,7 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
     } else {
       SPRITE->gravity=0.0;
       SPRITE->seated=1;
-      SPRITE->jump_poison=0;
-      SPRITE->jump_power=JUMP_INITIAL;
+      SPRITE->jumpok=!injump;
     }
   }
   
@@ -113,11 +129,13 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
    */
   if (indx) {
     sprite->xform=(indx<0)?EGG_XFORM_XREV:0;
-    sprite_move(sprite,6.000*elapsed*indx,0.0);
+    if (!SPRITE->charging) {
+      sprite_move(sprite,6.000*elapsed*indx,0.0);
+    }
   }
-  if (indy) {
-    sprite_move(sprite,0.0,6.000*elapsed*indy);
-  }
+  //if (indy) {
+  //  sprite_move(sprite,0.0,6.000*elapsed*indy);
+  //}
   
   //TODO
 }

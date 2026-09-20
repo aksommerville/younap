@@ -7,7 +7,8 @@ void advance_sun(double elapsed) {
   g.sunp+=elapsed*0.100; // TODO Sun rate. Maybe configurable per map?
   if (g.sunp>=1.0) {
     fprintf(stderr,"END OF DAY\n");//TODO
-    game_start_level(1);
+    //game_start_level(1);
+    g.sunp=0.0; // Annoying to keep restarting. For now, just reset the sun and keep sprites as they are
   }
 }
 
