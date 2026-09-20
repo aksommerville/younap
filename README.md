@@ -22,5 +22,10 @@ Guide the cats to the sunbeams so they can take a nap.
 
 - [x] Scratch graphics.
 - [x] Map loader.
-- [ ] Generic sprites.
-- [ ] Sunbeams. Model and render.
+- [x] Generic sprites.
+- [x] Sunbeams. Model and render.
+- [ ] Hero sprite.
+- [ ] Napping and scorekeeping.
+- [ ] Advance level.
+- [ ] Game over.
+- [ ] Hazards.

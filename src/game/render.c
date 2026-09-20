@@ -71,5 +71,18 @@ void render_sunbeams() {
  */
 
 void render_sprites() {
-  //TODO
+  struct sprite **spritep=spritev;
+  int spritei=spritec;
+  for (;spritei-->0;spritep++) {
+    struct sprite *sprite=*spritep;
+    if (sprite->defunct) continue;
+    int x=(int)(sprite->x*NS_sys_tilesize);
+    int y=(int)(sprite->y*NS_sys_tilesize);
+    if (sprite->type->render) {
+      sprite->type->render(sprite,x,y);
+    } else {
+      graf_set_image(&g.graf,sprite->imageid);
+      graf_tile(&g.graf,x,y,sprite->tileid,sprite->xform);
+    }
+  }
 }

@@ -11,7 +11,7 @@ int game_start_level(int mapid) {
   const void *serial;
   int serialc=res_get(&serial,EGG_TID_map,mapid);
   if (serialc<1) {
-    fprintf(stderr,"map:%d not found\n",mapid);
+    fprintf(stderr,"map:%d not found\n",mapid);//TODO should be our "game over" trigger
     return -1;
   }
   struct map_res res;
@@ -24,6 +24,7 @@ int game_start_level(int mapid) {
    */
   g.windowc=0;
   g.sunp=0.0;
+  sprites_nuke();
   
   /* Read commands.
    */
@@ -48,8 +49,8 @@ int game_start_level(int mapid) {
           int x=cmd.arg[0];
           int y=cmd.arg[1];
           int spriteid=(cmd.arg[2]<<8)|cmd.arg[3];
-          const uint8_t *arg=cmd.arg+4;
-          fprintf(stderr,"TODO spawn sprite:%d at %d,%d with arg: %02x %02x %02x %02x\n",spriteid,x,y,arg[0],arg[1],arg[2],arg[3]);//TODO
+          uint32_t arg=(cmd.arg[4]<<24)|(cmd.arg[5]<<16)|(cmd.arg[6]<<8)|cmd.arg[7];
+          struct sprite *sprite=sprite_spawn(x+0.5,y+0.5,spriteid,arg);
         } break;
         
     }

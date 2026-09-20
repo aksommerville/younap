@@ -18,3 +18,4 @@ image image:scratch
 window @12,8 2 2
 window @5,6 1 1
 window @20,7 1 1
+sprite @3,12 sprite:scratchcat (u32)0

@@ -9,10 +9,12 @@
 #include "util/text/text.h"
 #include "egg_res_toc.h"
 #include "shared_symbols.h"
+#include "sprite/sprite.h"
 
 #define FBW 960
 #define FBH 480
 #define WINDOW_LIMIT 8
+#define INPUT_LIMIT 5 /* One more than the max player count. */
 
 extern struct g {
   void *rom;
@@ -20,6 +22,7 @@ extern struct g {
   struct rom_entry *resv;
   int resc,resa;
   struct graf graf;
+  int input[INPUT_LIMIT],pvinput[INPUT_LIMIT];
   
   /* Single tilesheet, and just one interesting table.
    */

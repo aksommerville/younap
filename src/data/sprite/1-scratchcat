@@ -1,0 +1,3 @@
+image image:scratch
+tile 32 0
+type (u16:sprtype)cat
