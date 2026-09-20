@@ -11,7 +11,7 @@ int game_start_level(int mapid) {
   const void *serial;
   int serialc=res_get(&serial,EGG_TID_map,mapid);
   if (serialc<1) {
-    fprintf(stderr,"map:%d not found\n",mapid);
+    fprintf(stderr,"map:%d not found\n",mapid);//TODO should be our "game over" trigger
     return -1;
   }
   struct map_res res;
@@ -23,10 +23,8 @@ int game_start_level(int mapid) {
   /* Reset some globals.
    */
   g.windowc=0;
-  g.sunmidx=NS_sys_mapw*0.5;
-  g.sunmidy=NS_sys_maph;
-  g.sunr=50.0; // not to scale :)
-  g.sunt=0.0;
+  g.sunp=0.0;
+  sprites_nuke();
   
   /* Read commands.
    */
@@ -41,44 +39,68 @@ int game_start_level(int mapid) {
           window->y=cmd.arg[1];
           window->w=cmd.arg[2];
           window->h=cmd.arg[3];
+          if ((window->w<1)||(window->h<1)||(window->x+window->w>NS_sys_mapw)||(window->y+window->h>NS_sys_maph)) {
+            fprintf(stderr,"map:%d invalid window (%d,%d,%d,%d)\n",mapid,window->x,window->y,window->w,window->h);
+            return -1;
+          }
         } break;
     
       case CMD_map_sprite: {
           int x=cmd.arg[0];
           int y=cmd.arg[1];
           int spriteid=(cmd.arg[2]<<8)|cmd.arg[3];
-          const uint8_t *arg=cmd.arg+4;
-          fprintf(stderr,"TODO spawn sprite:%d at %d,%d with arg: %02x %02x %02x %02x\n",spriteid,x,y,arg[0],arg[1],arg[2],arg[3]);//TODO
+          uint32_t arg=(cmd.arg[4]<<24)|(cmd.arg[5]<<16)|(cmd.arg[6]<<8)|cmd.arg[7];
+          struct sprite *sprite=sprite_spawn(x+0.5,y+0.5,spriteid,arg);
         } break;
         
     }
   }
   
-  return 0;
-}
-
-/* Advance the sun.
- */
- 
-void game_advance_sun(double elapsed) {
-  g.sunt+=elapsed*0.200;
-  if (g.sunt>=M_PI) {
-    fprintf(stderr,"END OF DAY\n");//TODO
-    game_start_level(1);
-  }
-}
-
-/* Regenerate spots.
- */
- 
-void game_regenerate_spots() {
-  g.spotc=0;
-  
-  /* Arguably, we should project a unique ray for each outside window corner, from the sun's center.
-   * But I think it might be even better to do it naively: All sunbeams have exactly the same angle.
-   * Because in real life, the sun is far away.
+  /* Find each window's floor.
+   * There must be a solid or oneway cell at (x,y+h) or below.
    */
-  double nx=cos(g.sunt);
-  double ny=sin(g.sunt);
-  //TODO
+  struct window *window=g.windowv;
+  int i=g.windowc;
+  for (;i-->0;window++) {
+    window->floory=window->y+window->h;
+    for (;;) {
+      if (window->floory>=NS_sys_maph) {
+        fprintf(stderr,"map:%d, window at %d,%d has no floor below.\n",mapid,window->x,window->y);
+        return -1;
+      }
+      uint8_t physics=g.physics[g.cellv[window->floory*NS_sys_mapw+window->x]];
+      if ((physics==NS_physics_solid)||(physics==NS_physics_oneway)) break;
+      window->floory++;
+    }
+    // (beaml,beamr) should be overwritten before the first render. But if not, they're straight down.
+    window->beaml=window->x;
+    window->beamr=window->x+window->w;
+    // Confirm that that floor extends to the diagonals spreading from the window's top.
+    // Not looking for occlusions above -1, because that starts to get complicated.
+    // This is only validation; in theory we could be doing it at build time instead.
+    int dy=window->floory-window->y;
+    int xlo=window->x-dy; // inclusive
+    int xhi=window->x+window->w+dy; // exclusive
+    if ((xlo<0)||(xhi>NS_sys_mapw)) {
+      fprintf(stderr,"map:%d, window at %d,%d exceeds horizontal map edges\n",mapid,window->x,window->y);
+      return -1;
+    }
+    const uint8_t *mbtm=g.cellv+window->floory*NS_sys_mapw+xlo;
+    const uint8_t *mtop=mbtm-NS_sys_mapw;
+    int x=xlo;
+    for (;x<xhi;x++,mbtm++,mtop++) {
+      uint8_t phtop=g.physics[*mtop];
+      uint8_t phbtm=g.physics[*mbtm];
+      if (phtop!=NS_physics_vacant) {
+        fprintf(stderr,"map:%d, window at %d,%d beam is occluded at %d,%d\n",mapid,window->x,window->y,x,window->floory-1);
+        return -1;
+      }
+      if ((phbtm!=NS_physics_solid)&&(phbtm!=NS_physics_oneway)) {
+        fprintf(stderr,"map:%d, window at %d,%d beam runs off a cliff around %d,%d\n",mapid,window->x,window->y,x,window->floory);
+        return -1;
+      }
+    }
+  }
+  
+  return 0;
 }

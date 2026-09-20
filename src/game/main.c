@@ -90,10 +90,22 @@ void egg_client_notify(int k,int v) {
 
 void egg_client_update(double elapsed) {
 
-  game_advance_sun(elapsed);
-  game_regenerate_spots();
+  memcpy(g.pvinput,g.input,sizeof(g.input));
+  egg_input_get_all(g.input,INPUT_LIMIT);
 
-  //TODO
+  advance_sun(elapsed);
+  regenerate_spots();
+  require_cat_inputs();
+  
+  // Update sprites, then reap the defunct ones.
+  struct sprite **spritep=spritev;
+  int spritei=spritec;
+  for (;spritei-->0;spritep++) {
+    struct sprite *sprite=*spritep;
+    if (sprite->defunct) continue;
+    if (sprite->type->update) sprite->type->update(sprite,elapsed);
+  }
+  sprites_reap();
 }
 
 /* Render.
