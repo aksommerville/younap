@@ -65,4 +65,16 @@ const struct sprite_type *sprite_type_by_id(int sprtype);
 FOR_EACH_SPRTYPE
 #undef _
 
+/* For sprites participating in physics.
+ * Returns nonzero if we move at all.
+ * Won't correct in the opposite direction.
+ */
+int sprite_move(struct sprite *sprite,double dx,double dy);
+
+/* Specific types.
+ ***************************************************************************/
+ 
+// sprite_cat.c
+void require_cat_inputs();
+
 #endif

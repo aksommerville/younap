@@ -25,6 +25,8 @@ Guide the cats to the sunbeams so they can take a nap.
 - [x] Generic sprites.
 - [x] Sunbeams. Model and render.
 - [ ] Hero sprite.
+- [ ] L1/R1 to select cat.
+- [ ] Generic physics.
 - [ ] Napping and scorekeeping.
 - [ ] Advance level.
 - [ ] Game over.

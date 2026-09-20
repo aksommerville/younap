@@ -95,6 +95,7 @@ void egg_client_update(double elapsed) {
 
   advance_sun(elapsed);
   regenerate_spots();
+  require_cat_inputs();
   
   // Update sprites, then reap the defunct ones.
   struct sprite **spritep=spritev;
