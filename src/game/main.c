@@ -90,8 +90,8 @@ void egg_client_notify(int k,int v) {
 
 void egg_client_update(double elapsed) {
 
-  game_advance_sun(elapsed);
-  game_regenerate_spots();
+  advance_sun(elapsed);
+  regenerate_spots();
 
   //TODO
 }

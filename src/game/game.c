@@ -60,49 +60,10 @@ int game_start_level(int mapid) {
 /* Advance the sun.
  */
  
-void game_advance_sun(double elapsed) {
+void advance_sun(double elapsed) {
   g.sunt+=elapsed*0.200;
   if (g.sunt>=M_PI) {
     fprintf(stderr,"END OF DAY\n");//TODO
     game_start_level(1);
-  }
-}
-
-/* Regenerate spots, recursive entry point.
- * It proceeds, examining each row, until eliminated or offscreen.
- */
- 
-static void game_regenerate_spots_inner(int y,double xa,double xz,double xpery) {
-  if ((y<0)||(y>=NS_sys_maph)) return;
-  if (xa>=xz) return;
-  
-  if (g.spotc>=SPOT_LIMIT) return;
-  g.spotv[g.spotc++]=(struct spot){y,xa,xz};//TODO
-}
-
-/* Regenerate spots.
- */
- 
-void game_regenerate_spots() {
-  g.spotc=0;
-  
-  /* Arguably, we should project a unique ray for each outside window corner, from the sun's center.
-   * But I think it might be even better to do it naively: All sunbeams have exactly the same angle.
-   * Because in real life, the sun is far away.
-   */
-  double ny=sin(g.sunt);
-  if (ny<0.100) return; // Negative or very slanted beams, don't even bother.
-  double nx=cos(g.sunt);
-  double xpery=nx/ny;
-  struct window *window=g.windowv;
-  int i=g.windowc;
-  if (nx<0.0) {
-    for (;i-->0;window++) {
-      game_regenerate_spots_inner(window->y+window->h,window->x+xpery*window->h,window->x+window->w,xpery);
-    }
-  } else {
-    for (;i-->0;window++) {
-      game_regenerate_spots_inner(window->y+window->h,window->x,window->x+window->w+xpery*window->h,xpery);
-    }
   }
 }

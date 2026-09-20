@@ -50,17 +50,21 @@ extern struct g {
   
 } g;
 
+// main.c
 int res_search(int tid,int rid);
 int res_get(const void *dstpp,int tid,int rid);
 
+// render.c
 void render_far_bg(); // Fills framebuffer.
 void render_map();
 void render_sunbeams();
 void render_sprites();
 
+// game.c
 int game_start_level(int mapid);
+void advance_sun(double elapsed); // May start a new level.
 
-void game_advance_sun(double elapsed); // May start a new level.
-void game_regenerate_spots();
+// sunlight.c
+void regenerate_spots();
 
 #endif
