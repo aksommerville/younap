@@ -29,9 +29,11 @@ Guide the cats to the sunbeams so they can take a nap.
 - [x] L1/R1 to select cat.
 - [x] Generic physics.
 - [ ] Napping and scorekeeping.
-- [ ] Focussed cat indicator.
+- [x] Focussed cat indicator.
 - [ ] Stamina and charge indicators.
 - [ ] Advance level.
 - [ ] Game over.
 - [ ] Hazards.
 - [ ] Multiplayer.
+- [ ] Permanent wall damage.
+- [ ] Sound effects.
