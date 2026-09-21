@@ -7,17 +7,30 @@
 #define JUMP_MIN       4.0 /* m/s ; what you get if there's exactly one frame of charge */
 #define JUMP_DECEL    20.0 /* m/s**2 */
 
+// Enumerate the various faces, so we can detect changes without checking a bunch of different state every time.
+#define FACE_IDLE 0
+#define FACE_WALK 1
+#define FACE_CHARGE 2
+#define FACE_JUMP 3
+#define FACE_FALL 4
+#define FACE_CLIMB 5
+#define FACE_SLEEP 6
+
 struct sprite_cat {
   struct sprite hdr;
   int input; // <0 if i'm not being controlled
+  int face;
   int sleeping;
   int seated;
   int jumpok; // Can start charging a jump.
   int jumping; // True during jump, goes false when crested.
   int charging; // Preparing a jump.
   int walking;
+  int climbing;
   double gravity; // m/s
   double jump_power; // m/s, rises during charge
+  double animclock;
+  int animframe;
 };
 
 #define SPRITE ((struct sprite_cat*)sprite)
@@ -35,7 +48,44 @@ static int _cat_init(struct sprite *sprite) {
   SPRITE->input=-1;
   SPRITE->seated=1;
   SPRITE->jumpok=1;
+  SPRITE->face=FACE_IDLE;
   return 0;
+}
+
+/* Set face and update animation.
+ */
+
+static void cat_animate(struct sprite *sprite,double elapsed) {
+
+  int nface=SPRITE->face;
+       if (SPRITE->climbing) nface=FACE_CLIMB;
+  else if (SPRITE->sleeping) nface=FACE_SLEEP;
+  else if (SPRITE->charging) nface=FACE_CHARGE;
+  else if (SPRITE->jumping) nface=FACE_JUMP;
+  else if (!SPRITE->seated) nface=FACE_FALL;
+  else if (SPRITE->walking) nface=FACE_WALK;
+  else nface=FACE_IDLE;
+  if (nface!=SPRITE->face) {
+    SPRITE->face=nface;
+    SPRITE->animclock=0.0;
+    SPRITE->animframe=0;
+  }
+
+  if ((SPRITE->animclock-=elapsed)<=0.0) {
+    #define MONOTONIC(tag,sperframe,framec) case FACE_##tag: SPRITE->animclock+=sperframe; if (++(SPRITE->animframe)>=framec) SPRITE->animframe=0; break;
+    #define STILL(tag) case FACE_##tag: SPRITE->animclock+=1.000; break;
+    switch (SPRITE->face) {
+      MONOTONIC(CLIMB,0.150,4)
+      MONOTONIC(SLEEP,0.250,2)
+      MONOTONIC(CHARGE,0.250,2)
+      STILL(JUMP)
+      STILL(FALL)
+      MONOTONIC(WALK,0.200,4)
+      MONOTONIC(IDLE,0.200,4)
+    }
+    #undef MONOTONIC
+    #undef STILL
+  }
 }
 
 /* Update.
@@ -62,6 +112,7 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
     if (nsleeping) {
       SPRITE->input=-1;
       SPRITE->sleeping=1;
+      cat_animate(sprite,elapsed);
       return;
     }
     if (SPRITE->sleeping) {
@@ -140,7 +191,10 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
     SPRITE->walking=0;
   }
   
-  //TODO
+  /* Animation.
+   * This also takes care of setting (face). Do it last.
+   */
+  cat_animate(sprite,elapsed);
 }
 
 /* Render.
@@ -148,7 +202,33 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
  
 static void _cat_render(struct sprite *sprite,int x,int y) {
   graf_set_image(&g.graf,sprite->imageid);
-  graf_tile(&g.graf,x,y,sprite->tileid,sprite->xform);
+  
+  /* Frames: 0..3:idle, 4..5:charge, 6:jump, 7:fall, 8..9:sleep, 10..12:walk, 13..14:climb, 15:name
+   * Climbing will use xform differently; the source xform is irrelevant.
+   * Face and animframe are set for us, but animframe is interpretted differently for each face.
+   */
+  uint8_t tileid=sprite->tileid;
+  uint8_t xform=sprite->xform;
+  switch (SPRITE->face) {
+    case FACE_CLIMB: switch (SPRITE->animframe) {
+        case 0: tileid+=13; xform=0; break;
+        case 1: tileid+=14; xform=0; break;
+        case 2: tileid+=13; xform=EGG_XFORM_XREV; break;
+        case 3: tileid+=14; xform=EGG_XFORM_XREV; break;
+      } break;
+    case FACE_SLEEP: tileid+=8+SPRITE->animframe; break;
+    case FACE_CHARGE: tileid+=4+SPRITE->animframe; break;
+    case FACE_JUMP: tileid+=6; break;
+    case FACE_FALL: tileid+=7; break;
+    case FACE_WALK: switch (SPRITE->animframe) {
+        case 0: tileid+=10; break;
+        case 1: tileid+=11; break;
+        case 2: tileid+=12; break;
+        case 3: tileid+=11; break;
+      } break;
+    case FACE_IDLE: tileid+=SPRITE->animframe; break;
+  }
+  graf_tile(&g.graf,x,y,tileid,xform);
 }
 
 /* Type definition.
