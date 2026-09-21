@@ -6,6 +6,7 @@
 #define JUMP_LIMIT    10.0 /* m/s */
 #define JUMP_MIN       4.0 /* m/s ; what you get if there's exactly one frame of charge */
 #define JUMP_DECEL    20.0 /* m/s**2 */
+#define STANIMA_MAX    2.0 /* s */
 
 // Enumerate the various faces, so we can detect changes without checking a bunch of different state every time.
 #define FACE_IDLE 0
@@ -31,6 +32,8 @@ struct sprite_cat {
   double jump_power; // m/s, rises during charge
   double animclock;
   int animframe;
+  double stanima;
+  double jumpdx;
 };
 
 #define SPRITE ((struct sprite_cat*)sprite)
@@ -49,6 +52,7 @@ static int _cat_init(struct sprite *sprite) {
   SPRITE->seated=1;
   SPRITE->jumpok=1;
   SPRITE->face=FACE_IDLE;
+  SPRITE->stanima=STANIMA_MAX;
   return 0;
 }
 
@@ -112,6 +116,9 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
     if (nsleeping) {
       SPRITE->input=-1;
       SPRITE->sleeping=1;
+      SPRITE->charging=0;
+      SPRITE->jumping=0;
+      SPRITE->walking=0;
       cat_animate(sprite,elapsed);
       return;
     }
@@ -127,6 +134,7 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
   int indx=0;
   int indy=0;
   int injump=0;
+  int inclimb=0;
   if ((SPRITE->input>=0)&&(SPRITE->input<INPUT_LIMIT)) {
     switch (g.input[SPRITE->input]&(EGG_BTN_LEFT|EGG_BTN_RIGHT)) {
       case EGG_BTN_LEFT: indx=-1; break;
@@ -137,6 +145,35 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
       case EGG_BTN_DOWN: indy=1; break;
     }
     injump=(g.input[SPRITE->input]&EGG_BTN_SOUTH)?1:0;
+    inclimb=(g.input[SPRITE->input]&EGG_BTN_WEST)?1:0;
+  }
+  
+  /* Climbing is kind of a different thing.
+   */
+  if (!SPRITE->charging&&!SPRITE->climbing&&!SPRITE->seated&&inclimb&&(SPRITE->stanima>0.0)) {
+    SPRITE->climbing=1;
+    SPRITE->gravity=0.0;
+    SPRITE->jumpdx=0.0;
+    SPRITE->jump_power=0.0;
+    SPRITE->jumping=0;
+  }
+  if (SPRITE->climbing) {
+    if (!inclimb) {
+      SPRITE->climbing=0;
+    } else {
+      if ((SPRITE->stanima-=elapsed)<=0.0) {
+        SPRITE->climbing=0;
+      } else {
+        if (indx) sprite_move(sprite,4.000*elapsed*indx,0.0);
+        double dy=1.000+indy*3.000;
+        if (!sprite_move(sprite,0.0,dy*elapsed)&&(dy>0.0)) {
+          SPRITE->climbing=0;
+        } else {
+          cat_animate(sprite,elapsed);
+          return;
+        }
+      }
+    }
   }
   
   /* Gravity or jumping.
@@ -156,6 +193,8 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
       // Charge=>Jump.
       SPRITE->charging=0;
       SPRITE->jumping=1;
+      SPRITE->jumpdx=5.0;
+      if (sprite->xform) SPRITE->jumpdx*=-1.0;
     } else {
       SPRITE->jump_power+=JUMP_CHARGE*elapsed;
       if (SPRITE->jump_power>JUMP_LIMIT) SPRITE->jump_power=JUMP_LIMIT;
@@ -174,7 +213,21 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
       SPRITE->gravity=0.0;
       SPRITE->seated=1;
       SPRITE->jumpok=!injump;
+      SPRITE->stanima=STANIMA_MAX;
     }
+  }
+  
+  /* Jump X motion plays out even after cresting.
+   * But stops cold if you hit the floor. (or grab the wall; that's handled above).
+   */
+  if (SPRITE->seated&&!SPRITE->jumping) {
+    SPRITE->jumpdx=0.0;
+  } else if (SPRITE->jumpdx<0.0) {
+    if ((SPRITE->jumpdx+=5.000*elapsed)>=0.0) SPRITE->jumpdx=0.0;
+    else sprite_move(sprite,SPRITE->jumpdx*elapsed,0.0);
+  } else if (SPRITE->jumpdx>0.0) {
+    if ((SPRITE->jumpdx-=5.000*elapsed)<=0.0) SPRITE->jumpdx=0.0;
+    else sprite_move(sprite,SPRITE->jumpdx*elapsed,0.0);
   }
   
   /* Walking.
@@ -183,7 +236,9 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
     sprite->xform=(indx<0)?EGG_XFORM_XREV:0;
     if (!SPRITE->charging) {
       SPRITE->walking=1;
-      sprite_move(sprite,6.000*elapsed*indx,0.0);
+      double speed=6.000;
+      if (SPRITE->jumpdx>0.0) speed-=SPRITE->jumpdx; else speed+=SPRITE->jumpdx;
+      if (speed>0.0) sprite_move(sprite,speed*elapsed*indx,0.0);
     } else {
       SPRITE->walking=0;
     }

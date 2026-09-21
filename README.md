@@ -10,7 +10,7 @@ Guide the cats to the sunbeams so they can take a nap.
 
 - 2026-09-19T13:00 S Started.
 - 2026-09-19T23:59 S Temporary Itch page.
-- 2026-09-20T23:59 U Aim to have all programming done.
+- 2026-09-20T23:59 U Aim to have all programming done. ...big miss
 - 2026-09-21T23:59 M ?
 - 2026-09-22T23:59 T ?
 - 2026-09-23T23:59 R ?
@@ -25,6 +25,7 @@ Guide the cats to the sunbeams so they can take a nap.
 - [x] Generic sprites.
 - [x] Sunbeams. Model and render.
 - [ ] Hero sprite.
+- [ ] Minimum sleep time. Important, if you walk into a sunbeam from the right.
 - [ ] L1/R1 to select cat.
 - [ ] Generic physics.
 - [ ] Napping and scorekeeping.
