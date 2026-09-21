@@ -15,6 +15,7 @@ struct sprite_cat {
   int jumpok; // Can start charging a jump.
   int jumping; // True during jump, goes false when crested.
   int charging; // Preparing a jump.
+  int walking;
   double gravity; // m/s
   double jump_power; // m/s, rises during charge
 };
@@ -125,17 +126,19 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
     }
   }
   
-  /*XXX move per dpad, just getting things to happen, not real
+  /* Walking.
    */
   if (indx) {
     sprite->xform=(indx<0)?EGG_XFORM_XREV:0;
     if (!SPRITE->charging) {
+      SPRITE->walking=1;
       sprite_move(sprite,6.000*elapsed*indx,0.0);
+    } else {
+      SPRITE->walking=0;
     }
+  } else {
+    SPRITE->walking=0;
   }
-  //if (indy) {
-  //  sprite_move(sprite,0.0,6.000*elapsed*indy);
-  //}
   
   //TODO
 }
