@@ -92,6 +92,17 @@ void egg_client_update(double elapsed) {
 
   memcpy(g.pvinput,g.input,sizeof(g.input));
   egg_input_get_all(g.input,INPUT_LIMIT);
+  
+  /* L1/R1 to change cats.
+   * Also mirror L2/R2, in case the automapper screws up, which it does. We don't want two pairs.
+   */
+  int playerid=1;
+  for (;playerid<INPUT_LIMIT;playerid++) {
+    if (g.input[playerid]&EGG_BTN_L2) g.input[playerid]|=EGG_BTN_L1;
+    if (g.input[playerid]&EGG_BTN_R2) g.input[playerid]|=EGG_BTN_R1;
+         if ((g.input[playerid]&EGG_BTN_L1)&&!(g.pvinput[playerid]&EGG_BTN_L1)) cat_shuffle_input(playerid,-1);
+    else if ((g.input[playerid]&EGG_BTN_R1)&&!(g.pvinput[playerid]&EGG_BTN_R1)) cat_shuffle_input(playerid,1);
+  }
 
   advance_sun(elapsed);
   regenerate_spots();

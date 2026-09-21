@@ -14,7 +14,7 @@
 #define FBW 960
 #define FBH 480
 #define WINDOW_LIMIT 8
-#define INPUT_LIMIT 5 /* One more than the max player count. */
+#define INPUT_LIMIT 3 /* One more than the max player count. */
 
 extern struct g {
   void *rom;

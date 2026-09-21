@@ -7,6 +7,7 @@
 #define JUMP_MIN       4.0 /* m/s ; what you get if there's exactly one frame of charge */
 #define JUMP_DECEL    20.0 /* m/s**2 */
 #define STANIMA_MAX    2.0 /* s */
+#define SLEEP_TIME_MIN 1.000 /* s */
 
 // Enumerate the various faces, so we can detect changes without checking a bunch of different state every time.
 #define FACE_IDLE 0
@@ -34,6 +35,7 @@ struct sprite_cat {
   int animframe;
   double stanima;
   double jumpdx;
+  double sleeptime; // s, this nap. So we can enforce the minimum.
 };
 
 #define SPRITE ((struct sprite_cat*)sprite)
@@ -103,17 +105,27 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
    */
   if (SPRITE->seated) {
     int nsleeping=0;
-    int floory=(int)(sprite->y+1.0);
-    struct window *window=g.windowv;
-    int i=g.windowc;
-    for (;i-->0;window++) {
-      if (floory!=window->floory) continue;
-      if (sprite->x<window->beaml) continue;
-      if (sprite->x>window->beamr) continue;
+    if (SPRITE->sleeping&&(SPRITE->sleeptime<SLEEP_TIME_MIN)) {
+      // If we only just fell asleep, stay that way for at least some tasteful interval, don't even check.
       nsleeping=1;
-      break;
+    } else {
+      int floory=(int)(sprite->y+1.0);
+      struct window *window=g.windowv;
+      int i=g.windowc;
+      for (;i-->0;window++) {
+        if (floory!=window->floory) continue;
+        if (sprite->x<window->beaml) continue;
+        if (sprite->x>window->beamr) continue;
+        nsleeping=1;
+        break;
+      }
     }
     if (nsleeping) {
+      if (!SPRITE->sleeping) {
+        SPRITE->sleeping=1;
+        SPRITE->sleeptime=0.0;
+      }
+      SPRITE->sleeptime+=elapsed;
       SPRITE->input=-1;
       SPRITE->sleeping=1;
       SPRITE->charging=0;
@@ -332,5 +344,43 @@ void require_cat_inputs() {
       struct sprite *sprite=available;
       SPRITE->input=1;
     }
+  }
+}
+
+/* Public: Find a cat with the given playerid, and focus whoever's next or previous in the list.
+ * If no cat has this playerid, pick any.
+ */
+ 
+void cat_shuffle_input(int playerid,int d) {
+  #define HARD_CAT_LIMIT 10
+  struct sprite *catv[HARD_CAT_LIMIT]; // Only record those unassigned and awake, plus the current one.
+  int catc=0;
+  int cat_focusp=-1; // Index in (catv) where input currently resides, or -1.
+  struct sprite **spritep=spritev;
+  int spritei=spritec;
+  for (;spritei-->0;spritep++) {
+    struct sprite *sprite=*spritep;
+    if (sprite->defunct) continue;
+    if (sprite->type!=&sprite_type_cat) continue;
+    if (SPRITE->sleeping) continue; // We can ignore the sleeping cats entirely.
+    if (SPRITE->input<0) { // Record unassigned awake cats.
+      catv[catc++]=sprite;
+    } else if (SPRITE->input==playerid) { // Also record me.
+      cat_focusp=catc;
+      catv[catc++]=sprite;
+    }
+    if (catc>=HARD_CAT_LIMIT) break;
+  }
+  #undef HARD_CAT_LIMIT
+  if (cat_focusp>=0) { // Step in the list.
+    if (catc<2) return; // ...nope! It's just me.
+    int np=cat_focusp+d;
+    if (np<0) np=catc-1;
+    else if (np>=catc) np=0;
+    ((struct sprite_cat*)catv[cat_focusp])->input=-1;
+    ((struct sprite_cat*)catv[np])->input=playerid;
+  } else { // Pick any.
+    if (catc<1) return; // ...nope!
+    ((struct sprite_cat*)catv[0])->input=playerid;
   }
 }

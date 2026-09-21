@@ -24,11 +24,14 @@ Guide the cats to the sunbeams so they can take a nap.
 - [x] Map loader.
 - [x] Generic sprites.
 - [x] Sunbeams. Model and render.
-- [ ] Hero sprite.
-- [ ] Minimum sleep time. Important, if you walk into a sunbeam from the right.
-- [ ] L1/R1 to select cat.
-- [ ] Generic physics.
+- [x] Hero sprite.
+- [x] Minimum sleep time. Important, if you walk into a sunbeam from the right.
+- [x] L1/R1 to select cat.
+- [x] Generic physics.
 - [ ] Napping and scorekeeping.
+- [ ] Focussed cat indicator.
+- [ ] Stamina and charge indicators.
 - [ ] Advance level.
 - [ ] Game over.
 - [ ] Hazards.
+- [ ] Multiplayer.

@@ -3,5 +3,6 @@
 # Button names for incfg. Replace with something meaningful to your game.
 3 Movement
 4 Jump
-5 Prev Cat
-6 Next Cat
+5 Grab Wall
+6 Prev Cat
+7 Next Cat
