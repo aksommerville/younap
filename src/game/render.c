@@ -11,7 +11,7 @@ void render_far_bg() {
  */
  
 void render_map() {
-  graf_set_image(&g.graf,RID_image_scratch);
+  graf_set_image(&g.graf,RID_image_sprites);
   int dstx0=NS_sys_tilesize>>1;
   int dsty=NS_sys_tilesize>>1;
   const uint8_t *src=g.cellv;
@@ -93,16 +93,37 @@ void render_sprites() {
 void render_overlay() {
   graf_set_image(&g.graf,RID_image_fonttiles);
   
-  /* Clock in the middle.
+  /* Clock in the middle top.
    */
   {
+    int y=13;
     int s=(int)(g.levelclock+0.999);
     if (s<0) s=0; else if (s>99) s=99;
     if (s>=10) {
-      graf_tile(&g.graf,(FBW>>1)-6,20,'0'+s/10,0);
-      graf_tile(&g.graf,(FBW>>1)+6,20,'0'+s%10,0);
+      graf_tile(&g.graf,(FBW>>1)-6,y,'0'+s/10,0);
+      graf_tile(&g.graf,(FBW>>1)+6,y,'0'+s%10,0);
     } else {
-      graf_tile(&g.graf,(FBW>>1),20,'0'+s,0);
+      graf_tile(&g.graf,(FBW>>1),y,'0'+s,0);
     }
+  }
+  
+  /* Score readout at the bottom.
+   */
+  {
+    double range=g.leveltime*g.catc;
+    range*=0.750; // Don't show the full technically-possible range; it's not actually possible to fill that, ever.
+    double n=g.score/range;
+    int spacing=14;
+    int zc=FBW/spacing;
+    int y=FBH-13;
+    int x=10;
+    int hotc=(int)(zc*n);
+    if (hotc<0) hotc=0;
+    else if (hotc>zc) hotc=zc;
+    int coldc=zc-hotc;
+    for (;hotc-->0;x+=spacing) graf_tile(&g.graf,x,y,'Z',0);
+    graf_set_tint(&g.graf,0x404040ff);
+    for (;coldc-->0;x+=spacing) graf_tile(&g.graf,x,y,'Z',0);
+    graf_set_tint(&g.graf,0);
   }
 }

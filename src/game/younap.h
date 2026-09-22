@@ -34,6 +34,8 @@ extern struct g {
   double sunp; // 0..1
   double levelclock; // s, counts down
   double leveltime; // s, constant during level
+  double score; // s, sum of cats' total sleep times. Counts up to (leveltime*catc)
+  int catc; // How many cats when this level started. For scoring purposes.
   
   /* Windows come straight off the map: CMD_map_window.
    */

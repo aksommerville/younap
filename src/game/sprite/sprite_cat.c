@@ -125,6 +125,7 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
         SPRITE->sleeping=1;
         SPRITE->sleeptime=0.0;
       }
+      g.score+=elapsed;
       SPRITE->sleeptime+=elapsed;
       SPRITE->input=-1;
       SPRITE->sleeping=1;
