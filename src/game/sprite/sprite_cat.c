@@ -211,7 +211,7 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
       SPRITE->jump_power+=JUMP_CHARGE*elapsed;
       if (SPRITE->jump_power>JUMP_LIMIT) SPRITE->jump_power=JUMP_LIMIT;
     }
-  } else if (SPRITE->jumpok&&injump) {
+  } else if (SPRITE->jumpok&&SPRITE->seated&&injump) {
     // Begin charging.
     SPRITE->charging=1;
     SPRITE->jump_power=JUMP_MIN;

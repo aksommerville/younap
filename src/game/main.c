@@ -128,6 +128,7 @@ void egg_client_render() {
   render_map();
   render_sunbeams();
   render_sprites();
+  render_overlay();
   graf_flush(&g.graf);
 }
 

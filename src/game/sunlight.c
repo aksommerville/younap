@@ -4,12 +4,14 @@
  */
  
 void advance_sun(double elapsed) {
-  g.sunp+=elapsed*0.100; // TODO Sun rate. Maybe configurable per map?
-  if (g.sunp>=1.0) {
-    fprintf(stderr,"END OF DAY\n");//TODO
-    //game_start_level(1);
-    g.sunp=0.0; // Annoying to keep restarting. For now, just reset the sun and keep sprites as they are
+  if ((g.levelclock-=elapsed)<=0.0) {
+    fprintf(stderr,"%s:%d:TODO: End of level.\n",__FILE__,__LINE__);//TODO interlevel fanfare, check game over, etc
+    if (game_start_level(g.mapid)<0) {
+      egg_terminate(1);
+      return;
+    }
   }
+  g.sunp=1.0-g.levelclock/g.leveltime;
 }
 
 /* Regenerate spots.

@@ -86,3 +86,23 @@ void render_sprites() {
     }
   }
 }
+
+/* Overlay: Clock, score, etc.
+ */
+ 
+void render_overlay() {
+  graf_set_image(&g.graf,RID_image_fonttiles);
+  
+  /* Clock in the middle.
+   */
+  {
+    int s=(int)(g.levelclock+0.999);
+    if (s<0) s=0; else if (s>99) s=99;
+    if (s>=10) {
+      graf_tile(&g.graf,(FBW>>1)-6,20,'0'+s/10,0);
+      graf_tile(&g.graf,(FBW>>1)+6,20,'0'+s%10,0);
+    } else {
+      graf_tile(&g.graf,(FBW>>1),20,'0'+s,0);
+    }
+  }
+}

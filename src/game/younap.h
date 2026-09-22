@@ -32,6 +32,8 @@ extern struct g {
   uint8_t cellv[NS_sys_mapw*NS_sys_maph];
   
   double sunp; // 0..1
+  double levelclock; // s, counts down
+  double leveltime; // s, constant during level
   
   /* Windows come straight off the map: CMD_map_window.
    */
@@ -52,6 +54,7 @@ void render_far_bg(); // Fills framebuffer.
 void render_map();
 void render_sunbeams();
 void render_sprites();
+void render_overlay();
 
 // game.c
 int game_start_level(int mapid);

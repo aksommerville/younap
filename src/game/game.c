@@ -22,8 +22,10 @@ int game_start_level(int mapid) {
   
   /* Reset some globals.
    */
+  g.mapid=mapid;
   g.windowc=0;
   g.sunp=0.0;
+  g.leveltime=g.levelclock=20.0;
   sprites_nuke();
   
   /* Read commands.
