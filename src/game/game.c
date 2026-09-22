@@ -22,8 +22,12 @@ int game_start_level(int mapid) {
   
   /* Reset some globals.
    */
+  g.mapid=mapid;
   g.windowc=0;
   g.sunp=0.0;
+  g.leveltime=g.levelclock=20.0;
+  g.score=0.0;
+  g.catc=0;
   sprites_nuke();
   
   /* Read commands.
@@ -51,9 +55,16 @@ int game_start_level(int mapid) {
           int spriteid=(cmd.arg[2]<<8)|cmd.arg[3];
           uint32_t arg=(cmd.arg[4]<<24)|(cmd.arg[5]<<16)|(cmd.arg[6]<<8)|cmd.arg[7];
           struct sprite *sprite=sprite_spawn(x+0.5,y+0.5,spriteid,arg);
+          if (sprite) {
+            if (sprite->type==&sprite_type_cat) g.catc++;
+          }
         } break;
         
     }
+  }
+  if (!g.catc) {
+    fprintf(stderr,"map:%d no cats\n",mapid);
+    return -1;
   }
   
   /* Find each window's floor.

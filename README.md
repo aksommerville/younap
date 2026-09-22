@@ -28,10 +28,13 @@ Guide the cats to the sunbeams so they can take a nap.
 - [x] Minimum sleep time. Important, if you walk into a sunbeam from the right.
 - [x] L1/R1 to select cat.
 - [x] Generic physics.
-- [ ] Napping and scorekeeping.
-- [ ] Focussed cat indicator.
+- [ ] One-way platforms.
+- [x] Napping and scorekeeping.
+- [x] Focussed cat indicator.
 - [ ] Stamina and charge indicators.
 - [ ] Advance level.
 - [ ] Game over.
 - [ ] Hazards.
 - [ ] Multiplayer.
+- [ ] Permanent wall damage.
+- [ ] Sound effects.

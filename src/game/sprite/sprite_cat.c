@@ -125,6 +125,7 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
         SPRITE->sleeping=1;
         SPRITE->sleeptime=0.0;
       }
+      g.score+=elapsed;
       SPRITE->sleeptime+=elapsed;
       SPRITE->input=-1;
       SPRITE->sleeping=1;
@@ -211,7 +212,7 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
       SPRITE->jump_power+=JUMP_CHARGE*elapsed;
       if (SPRITE->jump_power>JUMP_LIMIT) SPRITE->jump_power=JUMP_LIMIT;
     }
-  } else if (SPRITE->jumpok&&injump) {
+  } else if (SPRITE->jumpok&&SPRITE->seated&&injump) {
     // Begin charging.
     SPRITE->charging=1;
     SPRITE->jump_power=JUMP_MIN;
@@ -294,6 +295,23 @@ static void _cat_render(struct sprite *sprite,int x,int y) {
         case 3: tileid+=11; break;
       } break;
     case FACE_IDLE: tileid+=SPRITE->animframe; break;
+  }
+  
+  uint32_t hilitecolor=0;
+  switch (SPRITE->input) {
+    case 1: hilitecolor=0xffff00ff; break;
+    case 2: hilitecolor=0xff0000ff; break;
+  }
+  if (hilitecolor) {
+    // Draw the tile four times, offset by a pixel in each of the cardinal directions, tinted full to the highlight color.
+    graf_set_tint(&g.graf,hilitecolor);
+    graf_set_alpha(&g.graf,0xc0);
+    graf_tile(&g.graf,x+2,y,tileid,xform);
+    graf_tile(&g.graf,x-2,y,tileid,xform);
+    //graf_tile(&g.graf,x,y+2,tileid,xform); // er, maybe not the downward offset, it interferes with the floor
+    graf_tile(&g.graf,x,y-2,tileid,xform);
+    graf_set_tint(&g.graf,0);
+    graf_set_alpha(&g.graf,0xff);
   }
   graf_tile(&g.graf,x,y,tileid,xform);
 }

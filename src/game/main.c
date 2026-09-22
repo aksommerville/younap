@@ -13,7 +13,7 @@ void egg_client_quit(int status) {
  */
  
 static int receive_tilesheet(int rid,const void *v,int c) {
-  if (rid!=RID_image_scratch) return 0;
+  if (rid!=RID_image_sprites) return 0;
   struct tilesheet_reader reader;
   if (tilesheet_reader_init(&reader,v,c)<0) return -1;
   struct tilesheet_entry entry;
@@ -74,7 +74,9 @@ int egg_client_init() {
   
   if (game_start_level(1)<0) return -1;
   
-  egg_play_song(1,RID_song_noodlecat,1,1.0,0.0);
+  //egg_play_song(1,RID_song_noodlecat,1,1.0,0.0);
+  //egg_play_song(1,RID_song_great_trouble,1,1.0,0.0);
+  egg_play_song(1,RID_song_sosweetsox,1,1.0,0.0);
 
   return 0;
 }
@@ -128,6 +130,7 @@ void egg_client_render() {
   render_map();
   render_sunbeams();
   render_sprites();
+  render_overlay();
   graf_flush(&g.graf);
 }
 
