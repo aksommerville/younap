@@ -82,8 +82,8 @@ int sprite_move(struct sprite *sprite,double dx,double dy) {
         VALIDATE
       } else if (ph==NS_physics_oneway) {
         if (dy>0.0) {
-          int prow=(int)(sprite->y+hbb);
-          if (prow<rowz) { // Oneway and our toes just crossed into it.
+          int prow=(int)(sprite->y+hbb-0.001);
+          if (prow<row) { // Oneway and our toes just crossed into it.
             ny=row-hbb;
             VALIDATE
           }

@@ -38,3 +38,5 @@ Guide the cats to the sunbeams so they can take a nap.
 - [ ] Multiplayer.
 - [ ] Permanent wall damage.
 - [ ] Sound effects.
+- [ ] Variable sun direction and duration per map.
+- [ ] Bonus condition per map.

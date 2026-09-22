@@ -30,6 +30,7 @@
 #define NS_physics_vacant 0
 #define NS_physics_solid 1
 #define NS_physics_oneway 2
+#define NS_physics_slippy 3 /* vacant but cats can't climb on it */
 
 // Editor uses the comment after a 'sprtype' symbol as a prompt in the new-sprite modal.
 // Should match everything after 'spriteid' in the CMD_map_sprite args.

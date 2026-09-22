@@ -94,6 +94,47 @@ static void cat_animate(struct sprite *sprite,double elapsed) {
   }
 }
 
+/* Down-jump, thru a one-way.
+ */
+ 
+static int cat_can_downjump(const struct sprite *sprite) {
+  int y=(int)(sprite->y+0.501);
+  if ((y<0)||(y>=NS_sys_maph)) return 0;
+  int xa=(int)(sprite->x-0.500);
+  int xz=(int)(sprite->x+0.499);
+  if (xa<0) xa=0;
+  if (xz>=NS_sys_mapw) xz=NS_sys_mapw-1;
+  const uint8_t *src=g.cellv+y*NS_sys_mapw+xa;
+  int i=xz-xa+1;
+  for (;i-->0;src++) {
+    uint8_t ph=g.physics[*src];
+    switch (ph) {
+      case NS_physics_vacant:
+      case NS_physics_slippy:
+      case NS_physics_oneway:
+        continue;
+      default: return 0;
+    }
+  }
+  return 1;
+}
+
+static void cat_downjump(struct sprite *sprite) {
+  SPRITE->jumpok=0;
+  sprite->y+=0.010; // Just a wee kick to put him below the one-way's upper edge.
+}
+
+/* Check slippage.
+ */
+ 
+static int cat_should_slip(const struct sprite *sprite) {
+  int x=(int)sprite->x;
+  int y=(int)sprite->y;
+  if ((x<0)||(y<0)||(x>=NS_sys_mapw)||(y>=NS_sys_maph)) return 0;
+  if (g.physics[g.cellv[y*NS_sys_mapw+x]]==NS_physics_slippy) return 1;
+  return 0;
+}
+
 /* Update.
  */
  
@@ -174,6 +215,7 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
     if (!inclimb) {
       SPRITE->climbing=0;
     } else {
+      if (cat_should_slip(sprite)) SPRITE->stanima=0.0;
       if ((SPRITE->stanima-=elapsed)<=0.0) {
         SPRITE->climbing=0;
       } else {
@@ -213,9 +255,13 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
       if (SPRITE->jump_power>JUMP_LIMIT) SPRITE->jump_power=JUMP_LIMIT;
     }
   } else if (SPRITE->jumpok&&SPRITE->seated&&injump) {
-    // Begin charging.
-    SPRITE->charging=1;
-    SPRITE->jump_power=JUMP_MIN;
+    if ((indy>0)&&cat_can_downjump(sprite)) {
+      cat_downjump(sprite);
+    } else {
+      // Begin charging.
+      SPRITE->charging=1;
+      SPRITE->jump_power=JUMP_MIN;
+    }
   } else {
     SPRITE->gravity+=elapsed*GRAVITY_ACCEL;
     if (SPRITE->gravity>GRAVITY_LIMIT) SPRITE->gravity=GRAVITY_LIMIT;
