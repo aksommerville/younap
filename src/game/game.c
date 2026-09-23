@@ -16,7 +16,6 @@ int game_start_level(int mapid) {
   }
   struct map_res res;
   if (map_res_decode(&res,serial,serialc)<0) return -1;
-  fprintf(stderr,"map:%d: %dx%d cmdc=%d\n",mapid,res.w,res.h,res.cmdc);
   if ((res.w!=NS_sys_mapw)||(res.h!=NS_sys_maph)) return -1;
   memcpy(g.cellv,res.v,NS_sys_mapw*NS_sys_maph);
   
@@ -112,6 +111,8 @@ int game_start_level(int mapid) {
       }
     }
   }
+  
+  prerender_map();
   
   return 0;
 }

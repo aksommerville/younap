@@ -36,6 +36,7 @@ struct sprite_cat {
   double stanima;
   double jumpdx;
   double sleeptime; // s, this nap. So we can enforce the minimum.
+  double wall_damage_clock;
 };
 
 #define SPRITE ((struct sprite_cat*)sprite)
@@ -135,6 +136,38 @@ static int cat_should_slip(const struct sprite *sprite) {
   return 0;
 }
 
+/* Periodically add a scratch mark to the background, when climbing.
+ */
+ 
+static uint32_t random_scratch_color() {
+  uint8_t r=0x20+rand()%0x40;
+  uint8_t g=r>>1;
+  uint8_t b=r>>1;
+  return (r<<24)|(g<<16)|(b<<8)|0x80;
+}
+ 
+static void cat_update_wall_damage(struct sprite *sprite,double elapsed) {
+  if ((SPRITE->wall_damage_clock-=elapsed)>0.0) return;
+  SPRITE->wall_damage_clock+=0.150;
+  double dx=0.250;
+  if (rand()&1) dx=-dx;
+  int x=(int)((sprite->x+dx)*NS_sys_tilesize);
+  int y=(int)((sprite->y-0.250)*NS_sys_tilesize);
+  int h=4;
+  uint32_t color=random_scratch_color();
+  x+=rand()%9-4;
+  y+=rand()%6;
+  h+=rand()%4-1;
+  if ((x<0)||(x>=FBW)) return;
+  graf_flush(&g.graf);
+  graf_reset(&g.graf);
+  graf_set_output(&g.graf,g.bgtexid);
+  graf_set_input(&g.graf,0);
+  graf_line(&g.graf,x,y,color,x,y+h,(color&0xffffff00));
+  graf_set_output(&g.graf,1);
+  graf_flush(&g.graf);
+}
+
 /* Update.
  */
  
@@ -224,6 +257,7 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
         if (!sprite_move(sprite,0.0,dy*elapsed)&&(dy>0.0)) {
           SPRITE->climbing=0;
         } else {
+          cat_update_wall_damage(sprite,elapsed);
           cat_animate(sprite,elapsed);
           return;
         }

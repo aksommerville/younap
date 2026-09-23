@@ -1,16 +1,13 @@
 #include "younap.h"
 
-/* Far background. The sky.
+/* Prerender map.
  */
  
-void render_far_bg() {
-  graf_fill_rect(&g.graf,0,0,FBW,FBH,0x80c0ffff);//TODO
-}
-
-/* Map cells.
- */
- 
-void render_map() {
+void prerender_map() {
+  egg_texture_clear(g.bgtexid);
+  graf_flush(&g.graf);
+  graf_reset(&g.graf);
+  graf_set_output(&g.graf,g.bgtexid);
   graf_set_image(&g.graf,RID_image_sprites);
   int dstx0=NS_sys_tilesize>>1;
   int dsty=NS_sys_tilesize>>1;
@@ -23,6 +20,22 @@ void render_map() {
       graf_tile(&g.graf,dstx,dsty,*src,0);
     }
   }
+  graf_set_output(&g.graf,1);
+}
+
+/* Far background. The sky.
+ */
+ 
+void render_far_bg() {
+  graf_fill_rect(&g.graf,0,0,FBW,FBH,0x80c0ffff);//TODO
+}
+
+/* Map cells.
+ */
+ 
+void render_map() {
+  graf_set_input(&g.graf,g.bgtexid);
+  graf_decal(&g.graf,0,0,0,0,FBW,FBH);
 }
 
 /* Sunbeams.

@@ -23,6 +23,7 @@ extern struct g {
   int resc,resa;
   struct graf graf;
   int input[INPUT_LIMIT],pvinput[INPUT_LIMIT];
+  int bgtexid; // Map image and scratch marks.
   
   /* Single tilesheet, and just one interesting table.
    */
@@ -52,6 +53,7 @@ int res_search(int tid,int rid);
 int res_get(const void *dstpp,int tid,int rid);
 
 // render.c
+void prerender_map(); // To (g.bgtexid).
 void render_far_bg(); // Fills framebuffer.
 void render_map();
 void render_sunbeams();
