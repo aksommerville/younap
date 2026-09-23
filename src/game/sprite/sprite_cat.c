@@ -37,6 +37,8 @@ struct sprite_cat {
   double jumpdx;
   double sleeptime; // s, this nap. So we can enforce the minimum.
   double wall_damage_clock;
+  double zanimclock;
+  int zanimframe;
 };
 
 #define SPRITE ((struct sprite_cat*)sprite)
@@ -92,6 +94,13 @@ static void cat_animate(struct sprite *sprite,double elapsed) {
     }
     #undef MONOTONIC
     #undef STILL
+  }
+  
+  if (SPRITE->sleeping) {
+    if ((SPRITE->zanimclock-=elapsed)<=0.0) {
+      SPRITE->zanimclock+=0.125;
+      if (++(SPRITE->zanimframe)>=16) SPRITE->zanimframe=0;
+    }
   }
 }
 
@@ -431,6 +440,12 @@ static void _cat_render(struct sprite *sprite,int x,int y) {
   switch (SPRITE->face) {
     case FACE_CHARGE: render_charge_indicator(sprite,x,y); break;
     case FACE_CLIMB: render_stamina_indicator(sprite,x,y); break;
+  }
+  
+  /* Zs when sleeping.
+   */
+  if (SPRITE->sleeping) {
+    graf_tile(&g.graf,x,y-20,0x80+SPRITE->zanimframe,0);
   }
 }
 

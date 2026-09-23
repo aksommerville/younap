@@ -49,12 +49,6 @@ void regenerate_spots() {
  
 void check_level_completion(double elapsed) {
   int win=0;
-  /*XXX Total time.
-  if (g.score>=g.leveltime) {
-    fprintf(stderr,"Finished level.\n");
-    win=1;
-  }
-  /**/
   
   int all_sleep=1;
   struct sprite **p=spritev;
