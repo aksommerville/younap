@@ -1,0 +1,3 @@
+image image:sprites
+tile 240 0
+type (u16:sprtype)cat

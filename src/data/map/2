@@ -16,8 +16,8 @@
 
 image image:sprites
 window @18,3 1 1
-sprite @2,3 sprite:noodle (u32)0
-sprite @26,10 sprite:binx (u32)0
+sprite @2,3 sprite:joey (u32)0
+sprite @26,10 sprite:sox (u32)0
 song song:great_trouble
 sunrate 0x0a00
 score 0x0500
