@@ -47,9 +47,34 @@ void regenerate_spots() {
 /* Poll for completion.
  */
  
-void check_level_completion() {
+void check_level_completion(double elapsed) {
+  int win=0;
+  /*XXX Total time.
   if (g.score>=g.leveltime) {
     fprintf(stderr,"Finished level.\n");
+    win=1;
+  }
+  /**/
+  
+  int all_sleep=1;
+  struct sprite **p=spritev;
+  int i=spritec;
+  for (;i-->0;p++) {
+    struct sprite *sprite=*p;
+    if (sprite->defunct||(sprite->type!=&sprite_type_cat)) continue;
+    if (!sprite_cat_is_sleeping(sprite)) {
+      all_sleep=0;
+      break;
+    }
+  }
+  if (all_sleep) {
+    g.all_sleep_time+=elapsed;
+    if (g.all_sleep_time>=1.0) win=1;
+  } else {
+    g.all_sleep_time=0.0;
+  }
+  
+  if (win) {
     if (game_start_level(g.mapid+1)<0) {
       if (game_start_level(1)<0) {
         egg_terminate(1);

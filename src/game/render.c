@@ -131,8 +131,12 @@ void render_overlay() {
   /* Score readout at the bottom.
    */
   {
+    /*XXX Total sleep time.
     double range=g.leveltime;
     double n=g.score/range;
+    /**/
+    double range=1.0;
+    double n=g.all_sleep_time;
     int spacing=14;
     int zc=FBW/spacing;
     int y=FBH-13;

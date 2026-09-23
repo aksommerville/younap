@@ -124,7 +124,7 @@ void egg_client_update(double elapsed) {
   }
   sprites_reap();
   
-  check_level_completion();
+  check_level_completion(elapsed);
 }
 
 /* Render.

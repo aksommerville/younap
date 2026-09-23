@@ -77,5 +77,6 @@ int sprite_move(struct sprite *sprite,double dx,double dy);
 // sprite_cat.c
 void require_cat_inputs();
 void cat_shuffle_input(int playerid,int d);
+int sprite_cat_is_sleeping(const struct sprite *sprite);
 
 #endif

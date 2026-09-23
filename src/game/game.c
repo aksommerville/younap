@@ -29,6 +29,7 @@ int game_start_level(int mapid) {
   g.leveltime=10.0;
   g.score=0.0;
   g.catc=0;
+  g.all_sleep_time=0.0;
   sprites_nuke();
   
   /* Read commands.

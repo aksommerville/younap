@@ -520,3 +520,11 @@ void cat_shuffle_input(int playerid,int d) {
     ((struct sprite_cat*)catv[0])->input=playerid;
   }
 }
+
+/* Cat's state.
+ */
+ 
+int sprite_cat_is_sleeping(const struct sprite *sprite) {
+  if (!sprite||(sprite->type!=&sprite_type_cat)) return 0;
+  return SPRITE->sleeping;
+}

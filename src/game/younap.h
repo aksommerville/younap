@@ -38,6 +38,7 @@ extern struct g {
   double leveltime; // s, time required to complete level.
   double score; // s, sum of cats' total sleep times. Counts up to (leveltime)
   int catc; // How many cats when this level started. For scoring purposes.
+  double all_sleep_time; // For how long have they all been asleep? Win after a short interval, say one second.
   
   /* Windows come straight off the map: CMD_map_window.
    */
@@ -70,6 +71,6 @@ int game_start_level(int mapid);
 // sunlight.c
 void advance_sun(double elapsed); // May start a new level.
 void regenerate_spots();
-void check_level_completion();
+void check_level_completion(double elapsed);
 
 #endif
