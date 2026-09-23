@@ -20,23 +20,11 @@ Guide the cats to the sunbeams so they can take a nap.
 
 ## TODO
 
-- [x] Scratch graphics.
-- [x] Map loader.
-- [x] Generic sprites.
-- [x] Sunbeams. Model and render.
-- [x] Hero sprite.
-- [x] Minimum sleep time. Important, if you walk into a sunbeam from the right.
-- [x] L1/R1 to select cat.
-- [x] Generic physics.
-- [x] One-way platforms.
-- [x] Napping and scorekeeping.
-- [x] Focussed cat indicator.
 - [ ] Stamina and charge indicators.
 - [ ] Advance level.
 - [ ] Game over.
 - [ ] Hazards.
 - [ ] Multiplayer.
-- [x] Permanent wall damage.
 - [ ] Sound effects.
 - [ ] Variable sun direction and duration per map.
 - [ ] Bonus condition per map.
