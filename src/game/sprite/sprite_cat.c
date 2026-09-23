@@ -6,7 +6,7 @@
 #define JUMP_LIMIT    10.0 /* m/s */
 #define JUMP_MIN       4.0 /* m/s ; what you get if there's exactly one frame of charge */
 #define JUMP_DECEL    20.0 /* m/s**2 */
-#define STANIMA_MAX    2.0 /* s */
+#define STAMINA_MAX    2.0 /* s */
 #define SLEEP_TIME_MIN 1.000 /* s */
 
 // Enumerate the various faces, so we can detect changes without checking a bunch of different state every time.
@@ -33,7 +33,7 @@ struct sprite_cat {
   double jump_power; // m/s, rises during charge
   double animclock;
   int animframe;
-  double stanima;
+  double stamina;
   double jumpdx;
   double sleeptime; // s, this nap. So we can enforce the minimum.
   double wall_damage_clock;
@@ -55,7 +55,7 @@ static int _cat_init(struct sprite *sprite) {
   SPRITE->seated=1;
   SPRITE->jumpok=1;
   SPRITE->face=FACE_IDLE;
-  SPRITE->stanima=STANIMA_MAX;
+  SPRITE->stamina=STAMINA_MAX;
   return 0;
 }
 
@@ -237,7 +237,7 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
   
   /* Climbing is kind of a different thing.
    */
-  if (!SPRITE->charging&&!SPRITE->climbing&&!SPRITE->seated&&inclimb&&(SPRITE->stanima>0.0)) {
+  if (!SPRITE->charging&&!SPRITE->climbing&&!SPRITE->seated&&inclimb&&(SPRITE->stamina>0.0)) {
     SPRITE->climbing=1;
     SPRITE->gravity=0.0;
     SPRITE->jumpdx=0.0;
@@ -248,8 +248,8 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
     if (!inclimb) {
       SPRITE->climbing=0;
     } else {
-      if (cat_should_slip(sprite)) SPRITE->stanima=0.0;
-      if ((SPRITE->stanima-=elapsed)<=0.0) {
+      if (cat_should_slip(sprite)) SPRITE->stamina=0.0;
+      if ((SPRITE->stamina-=elapsed)<=0.0) {
         SPRITE->climbing=0;
       } else {
         if (indx) sprite_move(sprite,4.000*elapsed*indx,0.0);
@@ -306,7 +306,7 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
       SPRITE->gravity=0.0;
       SPRITE->seated=1;
       SPRITE->jumpok=!injump;
-      SPRITE->stanima=STANIMA_MAX;
+      SPRITE->stamina=STAMINA_MAX;
     }
   }
   
@@ -345,6 +345,32 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
   cat_animate(sprite,elapsed);
 }
 
+/* Render artificial power meters.
+ */
+ 
+static void render_bar(int x,int y,double v,uint32_t fg) {
+  const int barw=40;
+  const int barh=3;
+  const int framew=barw+2;
+  const int frameh=barh+2;
+  const uint32_t bg=0x000000ff;
+  int fillw=(int)(v*barw);
+  if (fillw<0) fillw=0;
+  else if (fillw>barw) fillw=barw;
+  x-=framew>>1; // Translate (x,y) to the frame's top left corner.
+  y-=NS_sys_tilesize; // (y) is initially the cat's center, so we want much lower.
+  graf_fill_rect(&g.graf,x,y,framew,frameh,bg);
+  graf_fill_rect(&g.graf,x+1,y+1,fillw,barh,fg);
+}
+ 
+static void render_charge_indicator(struct sprite *sprite,int x,int y) {
+  render_bar(x,y,(SPRITE->jump_power-JUMP_MIN)/(JUMP_LIMIT-JUMP_MIN),0xffff00ff);
+}
+
+static void render_stamina_indicator(struct sprite *sprite,int x,int y) {
+  render_bar(x,y,SPRITE->stamina/STAMINA_MAX,0x00ff00ff);
+}
+
 /* Render.
  */
  
@@ -377,6 +403,8 @@ static void _cat_render(struct sprite *sprite,int x,int y) {
     case FACE_IDLE: tileid+=SPRITE->animframe; break;
   }
   
+  /* Highlight cats receiving input.
+   */
   uint32_t hilitecolor=0;
   switch (SPRITE->input) {
     case 1: hilitecolor=0xffff00ff; break;
@@ -393,7 +421,17 @@ static void _cat_render(struct sprite *sprite,int x,int y) {
     graf_set_tint(&g.graf,0);
     graf_set_alpha(&g.graf,0xff);
   }
+  
+  /* Draw my main tile.
+   */
   graf_tile(&g.graf,x,y,tileid,xform);
+  
+  /* Artificial indicators while charging or climbing.
+   */
+  switch (SPRITE->face) {
+    case FACE_CHARGE: render_charge_indicator(sprite,x,y); break;
+    case FACE_CLIMB: render_stamina_indicator(sprite,x,y); break;
+  }
 }
 
 /* Type definition.

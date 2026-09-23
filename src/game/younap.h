@@ -33,9 +33,10 @@ extern struct g {
   uint8_t cellv[NS_sys_mapw*NS_sys_maph];
   
   double sunp; // 0..1
-  double levelclock; // s, counts down
-  double leveltime; // s, constant during level
-  double score; // s, sum of cats' total sleep times. Counts up to (leveltime*catc)
+  double sundp; // Transits/second. Sign flips.
+  double levelclock; // s, counts up. Absolute time consumed.
+  double leveltime; // s, time required to complete level.
+  double score; // s, sum of cats' total sleep times. Counts up to (leveltime)
   int catc; // How many cats when this level started. For scoring purposes.
   
   /* Windows come straight off the map: CMD_map_window.
@@ -46,11 +47,14 @@ extern struct g {
     double beaml,beamr; // Meters, left and right extents of my sunbeam. Highly volatile.
   } windowv[WINDOW_LIMIT];
   int windowc;
+  
+  int songid;
 } g;
 
 // main.c
 int res_search(int tid,int rid);
 int res_get(const void *dstpp,int tid,int rid);
+void play_song(int rid);
 
 // render.c
 void prerender_map(); // To (g.bgtexid).
@@ -66,5 +70,6 @@ int game_start_level(int mapid);
 // sunlight.c
 void advance_sun(double elapsed); // May start a new level.
 void regenerate_spots();
+void check_level_completion();
 
 #endif

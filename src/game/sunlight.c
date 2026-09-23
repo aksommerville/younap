@@ -4,14 +4,15 @@
  */
  
 void advance_sun(double elapsed) {
-  if ((g.levelclock-=elapsed)<=0.0) {
-    fprintf(stderr,"%s:%d:TODO: End of level.\n",__FILE__,__LINE__);//TODO interlevel fanfare, check game over, etc
-    if (game_start_level(g.mapid)<0) {
-      egg_terminate(1);
-      return;
-    }
+  g.levelclock+=elapsed;
+  g.sunp+=g.sundp*elapsed;
+  if (g.sunp<0.0) {
+    g.sunp=0.0;
+    if (g.sundp<0.0) g.sundp=-g.sundp;
+  } else if (g.sunp>1.0) {
+    g.sunp=1.0;
+    if (g.sundp>0.0) g.sundp=-g.sundp;
   }
-  g.sunp=1.0-g.levelclock/g.leveltime;
 }
 
 /* Regenerate spots.
@@ -40,5 +41,21 @@ void regenerate_spots() {
     double cy=window->floory;
     window->beaml=ax+((cy-ay)*nx)/ny;
     window->beamr=bx+((cy-by)*nx)/ny;
+  }
+}
+
+/* Poll for completion.
+ */
+ 
+void check_level_completion() {
+  if (g.score>=g.leveltime) {
+    fprintf(stderr,"Finished level.\n");
+    if (game_start_level(g.mapid+1)<0) {
+      if (game_start_level(1)<0) {
+        egg_terminate(1);
+        return;
+      }
+      regenerate_spots();
+    }
   }
 }

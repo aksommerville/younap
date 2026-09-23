@@ -110,21 +110,28 @@ void render_overlay() {
    */
   {
     int y=13;
-    int s=(int)(g.levelclock+0.999);
-    if (s<0) s=0; else if (s>99) s=99;
-    if (s>=10) {
-      graf_tile(&g.graf,(FBW>>1)-6,y,'0'+s/10,0);
-      graf_tile(&g.graf,(FBW>>1)+6,y,'0'+s%10,0);
-    } else {
-      graf_tile(&g.graf,(FBW>>1),y,'0'+s,0);
+    int ms=(int)(g.levelclock*1000.0);
+    int s=ms/1000; ms%=1000;
+    int m=s/60; s%=60;
+    if (m>99) { // If you take an hour and a half to play one level, I'm not really worried about what we show on the clock.
+      m=99;
+      s=99;
+      ms=0;
     }
+    int x=(FBW>>1)-24;
+    if (m>=10) { // Minute tens digit shouldn't come up most of the time. It's off center, whatever.
+      graf_tile(&g.graf,x,y,'0'+m/10,0); x+=12;
+    }
+    graf_tile(&g.graf,x,y,'0'+m%10,0); x+=12;
+    if (ms<800) graf_tile(&g.graf,x,y,':',0); x+=12;
+    graf_tile(&g.graf,x,y,'0'+s/10,0); x+=12;
+    graf_tile(&g.graf,x,y,'0'+s%10,0);
   }
   
   /* Score readout at the bottom.
    */
   {
-    double range=g.leveltime*g.catc;
-    range*=0.750; // Don't show the full technically-possible range; it's not actually possible to fill that, ever.
+    double range=g.leveltime;
     double n=g.score/range;
     int spacing=14;
     int zc=FBW/spacing;

@@ -80,7 +80,7 @@ int egg_client_init() {
   
   //egg_play_song(1,RID_song_noodlecat,1,1.0,0.0);
   //egg_play_song(1,RID_song_great_trouble,1,1.0,0.0);
-  egg_play_song(1,RID_song_sosweetsox,1,1.0,0.0);
+  //egg_play_song(1,RID_song_sosweetsox,1,1.0,0.0);
 
   return 0;
 }
@@ -123,6 +123,8 @@ void egg_client_update(double elapsed) {
     if (sprite->type->update) sprite->type->update(sprite,elapsed);
   }
   sprites_reap();
+  
+  check_level_completion();
 }
 
 /* Render.
@@ -161,4 +163,13 @@ int res_get(const void *dstpp,int tid,int rid) {
   const struct rom_entry *res=g.resv+p;
   *(const void**)dstpp=res->v;
   return res->c;
+}
+
+/* Audio.
+ */
+ 
+void play_song(int rid) {
+  if (rid==g.songid) return;
+  g.songid=rid;
+  egg_play_song(1,rid,1,1.0,0.0);
 }

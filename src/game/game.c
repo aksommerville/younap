@@ -24,7 +24,9 @@ int game_start_level(int mapid) {
   g.mapid=mapid;
   g.windowc=0;
   g.sunp=0.0;
-  g.leveltime=g.levelclock=20.0;
+  g.sundp=0.250;
+  g.levelclock=0.0;
+  g.leveltime=10.0;
   g.score=0.0;
   g.catc=0;
   sprites_nuke();
@@ -35,6 +37,10 @@ int game_start_level(int mapid) {
   struct cmdlist_entry cmd;
   while (cmdlist_reader_next(&cmd,&reader)>0) {
     switch (cmd.opcode) {
+    
+      case CMD_map_song: play_song((cmd.arg[0]<<8)|cmd.arg[1]); break;
+      case CMD_map_sunrate: g.sundp=((cmd.arg[0]<<8)|cmd.arg[1])/65535.0; break;
+      case CMD_map_score: g.leveltime=((cmd.arg[0]<<8)|cmd.arg[1])/256.0; break;
     
       case CMD_map_window: if (g.windowc<WINDOW_LIMIT) {
           struct window *window=g.windowv+g.windowc++;

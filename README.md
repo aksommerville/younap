@@ -21,10 +21,11 @@ Guide the cats to the sunbeams so they can take a nap.
 ## TODO
 
 - [ ] Stamina and charge indicators.
-- [ ] Advance level.
+- [x] Advance level.
 - [ ] Game over.
 - [ ] Hazards.
 - [ ] Multiplayer.
 - [ ] Sound effects.
-- [ ] Variable sun direction and duration per map.
+- [x] Variable sun direction and duration per map.
 - [ ] Bonus condition per map.
+- [ ] Level intro and outtro.
