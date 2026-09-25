@@ -25,7 +25,7 @@ Guide the cats to the sunbeams so they can take a nap.
 - [ ] Game over.
 - [ ] Hazards.
 - [ ] Multiplayer.
-- [ ] Sound effects.
+- [x] Sound effects.
 - [x] Variable sun direction and duration per map.
 - [ ] Bonus condition per map.
 - [x] Level intro and outtro.

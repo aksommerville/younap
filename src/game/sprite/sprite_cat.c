@@ -132,6 +132,7 @@ static int cat_can_downjump(const struct sprite *sprite) {
 static void cat_downjump(struct sprite *sprite) {
   SPRITE->jumpok=0;
   sprite->y+=0.010; // Just a wee kick to put him below the one-way's upper edge.
+  SND(downjump)
 }
 
 /* Check slippage.
@@ -146,6 +147,7 @@ static int cat_should_slip(const struct sprite *sprite) {
 }
 
 /* Periodically add a scratch mark to the background, when climbing.
+ * Using this timing for the scratch sound too.
  */
  
 static uint32_t random_scratch_color() {
@@ -157,6 +159,7 @@ static uint32_t random_scratch_color() {
  
 static void cat_update_wall_damage(struct sprite *sprite,double elapsed) {
   if ((SPRITE->wall_damage_clock-=elapsed)>0.0) return;
+  SND(scratch)
   SPRITE->wall_damage_clock+=0.150;
   double dx=0.250;
   if (rand()&1) dx=-dx;
@@ -205,6 +208,7 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
     }
     if (nsleeping) {
       if (!SPRITE->sleeping) {
+        SND(sleep)
         SPRITE->sleeping=1;
         SPRITE->sleeptime=0.0;
       }
@@ -219,9 +223,11 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
       return;
     }
     if (SPRITE->sleeping) {
+      SND(wake)
       SPRITE->sleeping=0;
     }
   } else if (SPRITE->sleeping) {
+    SND(wake)
     SPRITE->sleeping=0;
   }
   
@@ -291,6 +297,7 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
   } else if (SPRITE->charging) {
     if (!injump) {
       // Charge=>Jump.
+      SND(jump)
       SPRITE->charging=0;
       SPRITE->jumping=1;
       SPRITE->jumpdx=5.0;
@@ -304,6 +311,7 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
       cat_downjump(sprite);
     } else {
       // Begin charging.
+      SND(charge)
       SPRITE->charging=1;
       SPRITE->jump_power=JUMP_MIN;
     }
@@ -314,6 +322,7 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
       SPRITE->seated=0;
       SPRITE->jump_power=0.0;
     } else {
+      if (SPRITE->gravity>=2.0) SND(land)
       SPRITE->gravity=0.0;
       SPRITE->seated=1;
       SPRITE->jumpok=!injump;
@@ -540,6 +549,7 @@ void cat_shuffle_input(int playerid,int d) {
     if (catc<1) return; // ...nope!
     ((struct sprite_cat*)catv[0])->input=playerid;
   }
+  SND(choosecat)
 }
 
 /* Cat's state.

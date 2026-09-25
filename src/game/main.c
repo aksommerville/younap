@@ -224,5 +224,5 @@ int res_get(const void *dstpp,int tid,int rid) {
 void play_song(int rid) {
   if (rid==g.songid) return;
   g.songid=rid;
-  egg_play_song(1,rid,1,1.0,0.0);
+  egg_play_song(1,rid,1,0.500,0.0);
 }
