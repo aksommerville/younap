@@ -246,12 +246,14 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
   
   /* Climbing is kind of a different thing.
    */
-  if (!SPRITE->charging&&!SPRITE->climbing&&!SPRITE->seated&&inclimb&&(SPRITE->stamina>0.0)) {
-    SPRITE->climbing=1;
-    SPRITE->gravity=0.0;
-    SPRITE->jumpdx=0.0;
-    SPRITE->jump_power=0.0;
-    SPRITE->jumping=0;
+  if (!SPRITE->charging&&!SPRITE->climbing&&inclimb&&(SPRITE->stamina>0.0)) {
+    if (!SPRITE->seated||(indy<0)) { // Start in the air, or while holding Up.
+      SPRITE->climbing=1;
+      SPRITE->gravity=0.0;
+      SPRITE->jumpdx=0.0;
+      SPRITE->jump_power=0.0;
+      SPRITE->jumping=0;
+    }
   }
   if (SPRITE->climbing) {
     if (!inclimb) {
