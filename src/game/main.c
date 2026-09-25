@@ -91,6 +91,15 @@ int egg_client_init() {
 void egg_client_notify(int k,int v) {
 }
 
+/* Mode.
+ */
+ 
+static int game_interactive() {
+  if (g.level_intro) return 0;
+  if (g.level_report) return 0;
+  return 1;
+}
+
 /* Update.
  */
 
@@ -106,25 +115,64 @@ void egg_client_update(double elapsed) {
   for (;playerid<INPUT_LIMIT;playerid++) {
     if (g.input[playerid]&EGG_BTN_L2) g.input[playerid]|=EGG_BTN_L1;
     if (g.input[playerid]&EGG_BTN_R2) g.input[playerid]|=EGG_BTN_R1;
-         if ((g.input[playerid]&EGG_BTN_L1)&&!(g.pvinput[playerid]&EGG_BTN_L1)) cat_shuffle_input(playerid,-1);
-    else if ((g.input[playerid]&EGG_BTN_R1)&&!(g.pvinput[playerid]&EGG_BTN_R1)) cat_shuffle_input(playerid,1);
+    if (game_interactive()) {
+           if ((g.input[playerid]&EGG_BTN_L1)&&!(g.pvinput[playerid]&EGG_BTN_L1)) cat_shuffle_input(playerid,-1);
+      else if ((g.input[playerid]&EGG_BTN_R1)&&!(g.pvinput[playerid]&EGG_BTN_R1)) cat_shuffle_input(playerid,1);
+    }
+  }
+  
+  /* Dismiss modal?
+   */
+  const int important_buttons=(EGG_BTN_SOUTH|EGG_BTN_WEST);
+  if (g.level_intro==1) {
+    if (!(g.input[0]&important_buttons)) g.level_intro=2;
+  } else if (g.level_intro==2) {
+    if (g.input[0]&EGG_BTN_SOUTH) {
+      SND(uiactivate)
+      g.level_intro=3;
+    }
+  } else if (g.level_intro==3) {
+    if (!(g.input[0]&important_buttons)) g.level_intro=0;
+    
+  } else if (g.level_report==1) {
+    if (!(g.input[0]&important_buttons)) g.level_report=2;
+  } else if (g.level_report==2) {
+    if (g.input[0]&EGG_BTN_SOUTH) {
+      SND(uiactivate)
+      g.level_report=3;
+    }
+  } else if (g.level_report==3) {
+    if (!(g.input[0]&important_buttons)) {
+      g.level_report=0;
+      if (game_start_level(g.mapid+1)<0) {
+        //TODO game over, you win
+        if (game_start_level(1)<0) {
+          egg_terminate(1);
+          return;
+        }
+      }
+    }
   }
 
-  advance_sun(elapsed);
-  regenerate_spots();
-  require_cat_inputs();
+  /* Normal stuff when game is running.
+   */
+  if (game_interactive()) {
+    advance_sun(elapsed);
+    regenerate_spots();
+    require_cat_inputs();
   
-  // Update sprites, then reap the defunct ones.
-  struct sprite **spritep=spritev;
-  int spritei=spritec;
-  for (;spritei-->0;spritep++) {
-    struct sprite *sprite=*spritep;
-    if (sprite->defunct) continue;
-    if (sprite->type->update) sprite->type->update(sprite,elapsed);
+    // Update sprites, then reap the defunct ones.
+    struct sprite **spritep=spritev;
+    int spritei=spritec;
+    for (;spritei-->0;spritep++) {
+      struct sprite *sprite=*spritep;
+      if (sprite->defunct) continue;
+      if (sprite->type->update) sprite->type->update(sprite,elapsed);
+    }
+    sprites_reap();
+    
+    check_level_completion(elapsed);
   }
-  sprites_reap();
-  
-  check_level_completion(elapsed);
 }
 
 /* Render.
@@ -137,6 +185,11 @@ void egg_client_render() {
   render_sunbeams();
   render_sprites();
   render_overlay();
+  if (g.level_intro) {
+    render_level_intro();
+  } else if (g.level_report) {
+    render_level_report();
+  }
   graf_flush(&g.graf);
 }
 

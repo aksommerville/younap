@@ -147,3 +147,37 @@ void render_overlay() {
     graf_set_tint(&g.graf,0);
   }
 }
+
+/* Centered text for intro and report.
+ * Caller arms image:fonttiles first.
+ * (y) is vertical center.
+ */
+ 
+static void render_string_centered(int y,const char *src,int srcc) {
+  if (!src) return;
+  if (srcc<0) { srcc=0; while (src[srcc]) srcc++; }
+  int x=(FBW>>1)-(srcc*6)+6;
+  for (;srcc-->0;src++,x+=12) graf_tile(&g.graf,x,y,*src,0);
+}
+
+/* Level intro.
+ */
+ 
+void render_level_intro() {
+  graf_fill_rect(&g.graf,0,0,FBW,FBH,0x000000c0);
+  if (g.level_intro>=3) return; // Text disappears when you press A, but the blotter lingers until you release it.
+  graf_set_image(&g.graf,RID_image_fonttiles);
+  render_string_centered((FBH>>1)-20,g.mapmsg,g.mapmsgc);
+  render_string_centered((FBH>>1)+20,"Press jump to begin",-1);
+}
+
+/* Level report.
+ */
+ 
+void render_level_report() {
+  graf_fill_rect(&g.graf,0,0,FBW,FBH,0x000000c0);
+  if (g.level_report>=3) return;
+  graf_set_image(&g.graf,RID_image_fonttiles);
+  render_string_centered(200,"Well napped!",-1);
+  render_string_centered(400,"Jump to proceed",-1);
+}

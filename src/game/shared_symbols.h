@@ -20,6 +20,7 @@
 #define CMD_map_window    0x40 /* u16:position u8:w u8:h */
 #define CMD_map_sprite    0x61 /* u16:position, u16:spriteid, u32:arg */
 #define CMD_map_door      0x62 /* u16:position, u16:mapid, u16:dstposition, u16:arg */
+#define CMD_map_mapmsg    0xe0 /* text */
 
 #define CMD_sprite_image 0x20 /* u16:imageid */
 #define CMD_sprite_tile  0x21 /* u8:tileid, u8:xform */

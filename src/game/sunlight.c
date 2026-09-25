@@ -69,12 +69,6 @@ void check_level_completion(double elapsed) {
   }
   
   if (win) {
-    if (game_start_level(g.mapid+1)<0) {
-      if (game_start_level(1)<0) {
-        egg_terminate(1);
-        return;
-      }
-      regenerate_spots();
-    }
+    g.level_report=1;
   }
 }

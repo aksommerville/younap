@@ -31,6 +31,8 @@ extern struct g {
   
   int mapid;
   uint8_t cellv[NS_sys_mapw*NS_sys_maph];
+  const char *mapmsg; // Stored in map. Rendered during (level_intro).
+  int mapmsgc;
   
   double sunp; // 0..1
   double sundp; // Transits/second. Sign flips.
@@ -50,6 +52,12 @@ extern struct g {
   int windowc;
   
   int songid;
+  
+  /* Alternate modes.
+   * No generic modal stack, everything's kind of ad-hoc.
+   */
+  int level_intro; // 0,1,2,3 = No, Waiting input drop, Waiting confirm, Waiting clear again.
+  int level_report; // 0,1,2,3 = ''
 } g;
 
 // main.c
@@ -64,6 +72,8 @@ void render_map();
 void render_sunbeams();
 void render_sprites();
 void render_overlay();
+void render_level_intro();
+void render_level_report();
 
 // game.c
 int game_start_level(int mapid);
@@ -72,5 +82,7 @@ int game_start_level(int mapid);
 void advance_sun(double elapsed); // May start a new level.
 void regenerate_spots();
 void check_level_completion(double elapsed);
+
+#define SND(tag) egg_play_sound(RID_sound_##tag,1.0,0.0);
 
 #endif

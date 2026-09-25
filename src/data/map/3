@@ -24,3 +24,4 @@ sprite @16,4 sprite:charlie (u32)0
 song song:sosweetsox
 sunrate 0x0800
 score 0x0a00
+mapmsg "Everybody\u0020needs\u0020to\u0020sleep\u0020at\u0020the\u0020same\u0020time."

@@ -21,3 +21,4 @@ sprite @26,10 sprite:sox (u32)0
 song song:great_trouble
 sunrate 0x0a00
 score 0x0500
+mapmsg "Down\u0020and\u0020Jump\u0020to\u0020pass\u0020thru\u0020some\u0020platforms."

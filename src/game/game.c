@@ -22,6 +22,8 @@ int game_start_level(int mapid) {
   /* Reset some globals.
    */
   g.mapid=mapid;
+  g.mapmsg=0;
+  g.mapmsgc=0;
   g.windowc=0;
   g.sunp=0.0;
   g.sundp=0.250;
@@ -30,6 +32,8 @@ int game_start_level(int mapid) {
   g.score=0.0;
   g.catc=0;
   g.all_sleep_time=0.0;
+  g.level_intro=1;
+  g.level_report=0;
   sprites_nuke();
   
   /* Read commands.
@@ -65,7 +69,11 @@ int game_start_level(int mapid) {
             if (sprite->type==&sprite_type_cat) g.catc++;
           }
         } break;
-        
+      
+      case CMD_map_mapmsg: {
+          g.mapmsg=(const char*)cmd.arg;
+          g.mapmsgc=cmd.argc;
+        } break;
     }
   }
   if (!g.catc) {
@@ -120,6 +128,7 @@ int game_start_level(int mapid) {
   }
   
   prerender_map();
+  regenerate_spots();
   
   return 0;
 }
