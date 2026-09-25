@@ -41,6 +41,7 @@ extern struct g {
   double score; // s, sum of cats' total sleep times. Counts up to (leveltime)
   int catc; // How many cats when this level started. For scoring purposes.
   double all_sleep_time; // For how long have they all been asleep? Win after a short interval, say one second.
+  int mrrrdr; // Nonzero if a cat has died.
   
   /* Windows come straight off the map: CMD_map_window.
    */

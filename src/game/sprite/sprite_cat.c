@@ -185,6 +185,14 @@ static void cat_update_wall_damage(struct sprite *sprite,double elapsed) {
  
 static void _cat_update(struct sprite *sprite,double elapsed) {
 
+  /* Y below some level, neutralize and report death.
+   */
+  if (sprite->y>NS_sys_maph+2.0) {
+    g.mrrrdr=1;
+    SPRITE->climbing=0;
+    return;
+  }
+
   /* If I'm standing in a sunbeam, I fall asleep and if not, I wake up.
    * Regardless of whether I'm currently bound to an input.
    * And if I'm sleeping, no need for further activity.

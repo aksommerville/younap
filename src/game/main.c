@@ -121,6 +121,15 @@ void egg_client_update(double elapsed) {
     }
   }
   
+  /* Reset due to death?
+   */
+  if (g.mrrrdr) {
+    if (game_start_level(g.mapid)<0) {
+      egg_terminate(1);
+      return;
+    }
+  }
+  
   /* Dismiss modal?
    */
   const int important_buttons=(EGG_BTN_SOUTH|EGG_BTN_WEST);
