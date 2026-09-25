@@ -386,6 +386,10 @@ static void render_stamina_indicator(struct sprite *sprite,int x,int y) {
 static void _cat_render(struct sprite *sprite,int x,int y) {
   graf_set_image(&g.graf,sprite->imageid);
   
+  /* Cheat it down so we can draw a surface into the tiles.
+   */
+  y+=3;
+  
   /* Frames: 0..3:idle, 4..5:charge, 6:jump, 7:fall, 8..9:sleep, 10..12:walk, 13..14:climb, 15:name
    * Climbing will use xform differently; the source xform is irrelevant.
    * Face and animframe are set for us, but animframe is interpretted differently for each face.

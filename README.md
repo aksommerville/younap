@@ -29,3 +29,5 @@ Guide the cats to the sunbeams so they can take a nap.
 - [x] Variable sun direction and duration per map.
 - [ ] Bonus condition per map.
 - [ ] Level intro and outtro.
+- [x] Cheese sprite rendering down a few pixels; make it ideal against the bookcase.
+- [ ] Allow starting wall climb from seated.
