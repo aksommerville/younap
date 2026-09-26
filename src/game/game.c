@@ -94,7 +94,7 @@ void score_finalize() {
   
   /* Check whether score or time sets a new record. They compare independently.
    */
-  if (memcmp(g.rptscore,g.hiscore,sizeof(g.rptscore))>1) {
+  if (memcmp(g.rptscore,g.hiscore,sizeof(g.rptscore))>0) {
     g.new_hi_score=1;
   } else {
     g.new_hi_score=0;
