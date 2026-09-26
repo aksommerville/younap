@@ -16,7 +16,7 @@
 
 image image:sprites
 sprite @9,8 sprite:noodle (u32)0
-sprite @20,5 sprite:mollie (u32)0
+sprite @20,5 sprite:gt (u32)0
 sprite @8,1 sprite:fish (u32)0
 sprite @21,1 sprite:fish (u32)0
 song song:noodlecat

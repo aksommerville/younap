@@ -20,7 +20,7 @@ window @3,10 1 1
 window @3,3 1 1
 window @9,6 1 1
 sprite @13,3 sprite:charlie (u32)0
-sprite @15,3 sprite:mollie (u32)0
+sprite @15,3 sprite:gt (u32)0
 sprite @14,3 sprite:binx (u32)0
 song song:great_trouble
 sunrate 0x0800
