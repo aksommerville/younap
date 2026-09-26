@@ -24,6 +24,26 @@ static int receive_tilesheet(int rid,const void *v,int c) {
   return 0;
 }
 
+/* Receive a map.
+ * These get TOC'd generically, this welcome function is just to count the fish and bonuses.
+ */
+ 
+static void receive_map(int rid,const void *v,int c) {
+  struct map_res res;
+  if (map_res_decode(&res,v,c)<0) return;
+  struct cmdlist_reader reader={.v=res.cmd,.c=res.cmdc};
+  struct cmdlist_entry cmd;
+  while (cmdlist_reader_next(&cmd,&reader)>0) {
+    switch (cmd.opcode) {
+      case CMD_map_bonus: g.bonusc_possible++; break;
+      case CMD_map_sprite: {
+          int spriteid=(cmd.arg[2]<<8)|cmd.arg[3];
+          if (spriteid==RID_sprite_fish) g.fishc_possible++;
+        } break;
+    }
+  }
+}
+
 /* Init.
  */
 
@@ -54,7 +74,7 @@ int egg_client_init() {
   while (rom_reader_next(&res,&reader)>0) {
     int keep=0;
     switch (res.tid) {
-      case EGG_TID_map: keep=1; break;
+      case EGG_TID_map: keep=1; receive_map(res.rid,res.v,res.c); break;
       case EGG_TID_tilesheet: if (receive_tilesheet(res.rid,res.v,res.c)<0) return -1; break;
       case EGG_TID_sprite: keep=1; break;
     }

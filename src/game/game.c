@@ -60,7 +60,6 @@ void score_finalize() {
    */
   const double time_min=((( 1.0 )))*60.0+((( 0.0 ))); // ((( M ))):((( S ))) ; At or below this time you get a perfect score.
   const double time_max=((( 5.0 )))*60.0+((( 0.0 ))); // ((( M ))):((( S ))) ; Above this time you get no time points.
-  const int fish_max=10; // Count of fish in the world.
   const int death_max=5; // Above this you get no death points.
   const int time_weight= 300000; // Portion of the million awarded per time.
   const int bonus_weight=200000; // '' per bonuses.
@@ -80,8 +79,11 @@ void score_finalize() {
     bonus_score=(double)g.bonusc_total/(double)g.bonusc_possible;
     if (bonus_score>1.0) bonus_score=1.0;
   }
-  double fish_score=(double)g.fishc_total/(double)fish_max;
-  if (fish_score>1.0) fish_score=1.0;
+  double fish_score=1.0;
+  if (g.fishc_possible) {
+    fish_score=(double)g.fishc_total/(double)g.fishc_possible;
+    if (fish_score>1.0) fish_score=1.0;
+  }
   double death_score=1.0-(double)g.deathc_total/(double)death_max;
   if (death_score<0.0) death_score=0.0;
   int score=(int)(time_score*time_weight+bonus_score*bonus_weight+fish_score*fish_weight+death_score*death_weight+pity_points);
@@ -116,15 +118,24 @@ void score_finalize() {
   if (g.new_hi_score||g.new_hi_time) {
     char tmp[20];
     int tmpc=0;
-    memcpy(tmp,g.rptscore,sizeof(g.rptscore));
+    if (g.new_hi_score) {
+      memcpy(tmp,g.rptscore,sizeof(g.rptscore));
+      memcpy(g.hiscore,g.rptscore,sizeof(g.rptscore));
+    } else {
+      memcpy(tmp,g.hiscore,sizeof(g.hiscore));
+    }
     tmpc=sizeof(g.rptscore);
     tmp[tmpc++]=';';
-    memcpy(tmp+tmpc,g.rpttime,g.rpttimec);
-    tmpc+=g.rpttimec;
+    if (g.new_hi_time) {
+      memcpy(tmp+tmpc,g.rpttime,g.rpttimec);
+      tmpc+=g.rpttimec;
+      memcpy(g.hitime,"00:00:00.000",12);
+      memcpy(g.hitime+12-g.rpttimec,g.rpttime,g.rpttimec);
+    } else {
+      memcmp(tmp+tmpc,g.hitime,sizeof(g.hitime));
+      tmpc+=sizeof(g.hitime);
+    }
     egg_store_set("hiscore",7,tmp,tmpc);
-    memcpy(g.hiscore,g.rptscore,sizeof(g.rptscore));
-    memcpy(g.hitime,"00:00:00.000",12);
-    memcpy(g.hitime+12-g.rpttimec,g.rpttime,g.rpttimec);
   }
 }
 
@@ -163,7 +174,6 @@ void game_reset_scores() {
   g.deathc_total=0;
   g.fishc_total=0;
   g.bonusc_total=0;
-  g.bonusc_possible=0;
 }
 
 /* Time or integer as a string.

@@ -25,6 +25,7 @@ extern struct g {
   int input[INPUT_LIMIT],pvinput[INPUT_LIMIT];
   int bgtexid; // Map image and scratch marks.
   int fishc_possible; // Collected during initial ROM scan.
+  int bonusc_possible; // ''
   
   /* Single tilesheet, and just one interesting table.
    */
@@ -75,7 +76,6 @@ extern struct g {
   int deathc_total;
   int fishc_total;
   int bonusc_total;
-  int bonusc_possible;
   char rptscore[6]; // Populated at start of Game Over.
   char rpttime[12]; // ''
   int rpttimec; // 0,8,9,11,12
