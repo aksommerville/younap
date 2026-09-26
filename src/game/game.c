@@ -58,8 +58,8 @@ void score_finalize() {
   /* Parameters for computing score.
    * We're not going to read anything dynamically off the maps; just hard-code the parameters here.
    */
-  const double time_min=((( 1.0 )))*60.0+((( 0.0 ))); // ((( M ))):((( S ))) ; At or below this time you get a perfect score.
-  const double time_max=((( 5.0 )))*60.0+((( 0.0 ))); // ((( M ))):((( S ))) ; Above this time you get no time points.
+  const double time_min=(((  2.5 )))*60.0; // At or below this time you get a perfect score.
+  const double time_max=((( 10.0 )))*60.0; // Above this time you get no time points.
   const int death_max=5; // Above this you get no death points.
   const int time_weight= 300000; // Portion of the million awarded per time.
   const int bonus_weight=200000; // '' per bonuses.
@@ -260,7 +260,7 @@ int decsint_repr(char *text,int texta,int v) {
  */
  
 int game_start_level(int mapid) {
-  
+
   /* Acquire resource, validation dimensions, copy cells.
    */
   const void *serial;

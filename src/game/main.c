@@ -44,6 +44,22 @@ static void receive_map(int rid,const void *v,int c) {
   }
 }
 
+/* Receive song.
+ * We just need to capture the tempo for game over.
+ */
+ 
+static void receive_song(int rid,const uint8_t *v,int c) {
+  switch (rid) {
+    case RID_song_fishie_fishie: {
+        if (c<6) return;
+        if (memcmp(v,"\0EAU",4)) return;
+        int msperqnote=(v[4]<<8)|v[5];
+        if (msperqnote<10.0) return;
+        g.gameover_tempo=(msperqnote*2.0)/1000.0;
+      } break;
+  }
+}
+
 /* Init.
  */
 
@@ -77,6 +93,7 @@ int egg_client_init() {
       case EGG_TID_map: keep=1; receive_map(res.rid,res.v,res.c); break;
       case EGG_TID_tilesheet: if (receive_tilesheet(res.rid,res.v,res.c)<0) return -1; break;
       case EGG_TID_sprite: keep=1; break;
+      case EGG_TID_song: receive_song(res.rid,res.v,res.c); break;
     }
     if (!keep) continue;
     if (g.resc>=g.resa) {

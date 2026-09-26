@@ -60,6 +60,8 @@ void gameover_begin() {
   g.level_report=0;
   g.hello=0;
   g.gameover=1;
+  g.gameover_clock=0.0;
+  g.gameover_headt=0.0;
   play_song(RID_song_fishie_fishie);
   
   score_finalize();
@@ -104,6 +106,26 @@ void gameover_render() {
     render_kv(y,"Best full clear",9,g.hitime_100+trimc,12-trimc);
     y+=20;
   }
+  
+  /* Bobblehead cats.
+   */
+  graf_set_image(&g.graf,RID_image_bobblehead);
+  graf_set_filter(&g.graf,1);
+  int bodyy_final=FBH-128;
+  int bodyy_initial=FBH+300;
+  double t=g.gameover_clock/5.0;
+  if (t<0.0) t=0.0; else if (t>1.0) t=1.0;
+  int bodyy=(int)((bodyy_initial*(1.0-t))+(bodyy_final*t));
+  int heady=bodyy-128;
+  int xl=180;
+  int xr=FBW-xl;
+  double cost=cos(g.gameover_headt);
+  double sint=sin(g.gameover_headt);
+  graf_decal(&g.graf,xl-128,bodyy-128,0,256,256,256);
+  graf_decal_rotate(&g.graf,xl,heady,0,0,256,cost,sint,1.0);
+  graf_decal(&g.graf,xr-128,bodyy-128,256,256,256,256);
+  graf_decal_rotate(&g.graf,xr,heady,256,0,256,cost,sint,1.0);
+  graf_set_filter(&g.graf,0);
 }
 
 /* Generic update.
@@ -153,7 +175,19 @@ void modal_update(double elapsed) {
   if (g.level_intro) result=modal_update_1(&g.level_intro,elapsed);
   else if (g.level_report) result=modal_update_1(&g.level_report,elapsed);
   else if (g.hello) result=modal_update_1(&g.hello,elapsed);
-  else if (g.gameover) result=modal_update_1(&g.gameover,elapsed);
+  else if (g.gameover) {
+    result=modal_update_1(&g.gameover,elapsed);
+    g.gameover_clock+=elapsed;
+    if (g.gameover_tempo>0.0) {
+      double ph=egg_song_get_playhead(1);
+      double t=fmod(ph,g.gameover_tempo)/g.gameover_tempo;
+      g.gameover_headt=t*M_PI;
+      if (g.gameover_headt>M_PI*0.5) {
+        g.gameover_headt=M_PI-g.gameover_headt;
+      }
+      g.gameover_headt+=M_PI*0.25;
+    }
+  }
   switch (result) {
     case MODAL_UPDATE_NEXT_LEVEL: {
         g.fishc_total+=g.fishc_level;
