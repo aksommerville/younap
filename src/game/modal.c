@@ -29,22 +29,20 @@ void hello_render() {
   
   /* Show best score and time if present.
    */
-  if (memcmp(g.hiscore,"000000",6)||memcmp(g.hitime,"00:00:00.000",12)) {
-    char msg[128];
-    memcpy(msg,"Record: ",8);
-    int msgc=8;
-    memcpy(msg+msgc,g.hiscore,sizeof(g.hiscore));
-    msgc+=sizeof(g.hiscore);
-    msg[msgc++]=' ';
-    msg[msgc++]='/';
-    msg[msgc++]=' ';
-    int trimc=0;
-    if (!memcmp(g.hitime,"00:0",4)) trimc=4;
-    else if (!memcmp(g.hitime,"00",2)) trimc=3;
-    else if (g.hitime[0]=='0') trimc=1;
-    memcpy(msg+msgc,g.hitime+trimc,sizeof(g.hitime)-trimc);
-    msgc+=sizeof(g.hitime)-trimc;
-    render_string_centered(360,msg,msgc);
+  int y=320;
+  if (memcmp(g.hiscore,"000000",6)) {
+    render_kv(y,"High score",10,g.hiscore,sizeof(g.hiscore));
+    y+=20;
+  }
+  if (memcmp(g.hitime_any,"00:00:00.000",12)) {
+    int trimc=trim_time(g.hitime_any);
+    render_kv(y,"Best time",9,g.hitime_any+trimc,12-trimc);
+    y+=20;
+  }
+  if (memcmp(g.hitime_100,"00:00:00.000",12)) {
+    int trimc=trim_time(g.hitime_100);
+    render_kv(y,"Full clear",10,g.hitime_100+trimc,12-trimc);
+    y+=20;
   }
 }
 
@@ -86,15 +84,19 @@ void gameover_render() {
     render_kv(y,"High score",10,g.hiscore,6);
     y+=20;
   }
-  if (g.new_hi_time) {
+  if (g.new_hi_time_any||g.new_hi_time_100) {
     render_string_centered(y,"New best time!",14);
     y+=20;
-  } else if (memcmp(g.hitime,"00:00:00.000",12)) {
-    int trimc=0;
-    if (!memcmp(g.hitime,"00:0",4)) trimc=4;
-    else if (!memcmp(g.hitime,"00",2)) trimc=3;
-    else if (g.hitime[0]=='0') trimc=1;
-    render_kv(y,"Best time",9,g.hitime+trimc,12-trimc); y+=20;
+  }
+  if (memcmp(g.hitime_any,"00:00:00.000",12)) {
+    int trimc=trim_time(g.hitime_any);
+    render_kv(y,"Best time",9,g.hitime_any+trimc,12-trimc);
+    y+=20;
+  }
+  if (memcmp(g.hitime_100,"00:00:00.000",12)) {
+    int trimc=trim_time(g.hitime_100);
+    render_kv(y,"Best full clear",9,g.hitime_100+trimc,12-trimc);
+    y+=20;
   }
 }
 

@@ -43,21 +43,9 @@ void render_map() {
  */
  
 void render_sunbeams() {
-
-  // XXX Probably no need to draw highlights on the floor.
-  uint32_t floor_color=0xffffffff;
   graf_set_input(&g.graf,0);
   struct window *window=g.windowv;
   int i=g.windowc;
-  /**
-  for (;i-->0;window++) {
-    graf_line(&g.graf,
-      (int)(window->beaml*NS_sys_tilesize),window->floory*NS_sys_tilesize+2,floor_color,
-      (int)(window->beamr*NS_sys_tilesize),window->floory*NS_sys_tilesize+2,floor_color
-    );
-  }
-  /**/
-  
   uint32_t ray_color=0xffff0080;
   for (window=g.windowv,i=g.windowc;i-->0;window++) {
     if (window->beaml<window->x) {
@@ -126,26 +114,6 @@ void render_overlay() {
     if (ms<800) graf_tile(&g.graf,x,y,':',0); x+=12;
     graf_tile(&g.graf,x,y,'0'+s/10,0); x+=12;
     graf_tile(&g.graf,x,y,'0'+s%10,0);
-  }
-  
-  /* Score readout at the bottom.
-   * XXX Feels superfluous.
-   */
-  if (0) {
-    double range=1.0;
-    double n=g.all_sleep_time;
-    int spacing=14;
-    int zc=FBW/spacing;
-    int y=FBH-13;
-    int x=10;
-    int hotc=(int)(zc*n);
-    if (hotc<0) hotc=0;
-    else if (hotc>zc) hotc=zc;
-    int coldc=zc-hotc;
-    for (;hotc-->0;x+=spacing) graf_tile(&g.graf,x,y,'Z',0);
-    graf_set_tint(&g.graf,0x404040ff);
-    for (;coldc-->0;x+=spacing) graf_tile(&g.graf,x,y,'Z',0);
-    graf_set_tint(&g.graf,0);
   }
 }
 

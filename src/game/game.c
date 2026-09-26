@@ -107,16 +107,21 @@ void score_finalize() {
   } else {
     g.new_hi_score=0;
   }
-  if (time_better(g.rpttime,g.rpttimec,g.hitime,sizeof(g.hitime))) {
-    g.new_hi_time=1;
+  if (time_better(g.rpttime,g.rpttimec,g.hitime_any,sizeof(g.hitime_any))) {
+    g.new_hi_time_any=1;
   } else {
-    g.new_hi_time=0;
+    g.new_hi_time_any=0;
+  }
+  if ((g.fishc_total>=g.fishc_possible)&&(g.bonusc_total>=g.bonusc_possible)&&time_better(g.rpttime,g.rpttimec,g.hitime_100,sizeof(g.hitime_100))) {
+    g.new_hi_time_100=1;
+  } else {
+    g.new_hi_time_100=0;
   }
   
   /* If a new record was set, encode and save it.
    */
-  if (g.new_hi_score||g.new_hi_time) {
-    char tmp[20];
+  if (g.new_hi_score||g.new_hi_time_any||g.new_hi_time_100) {
+    char tmp[40];
     int tmpc=0;
     if (g.new_hi_score) {
       memcpy(tmp,g.rptscore,sizeof(g.rptscore));
@@ -126,14 +131,24 @@ void score_finalize() {
     }
     tmpc=sizeof(g.rptscore);
     tmp[tmpc++]=';';
-    if (g.new_hi_time) {
+    if (g.new_hi_time_any) {
       memcpy(tmp+tmpc,g.rpttime,g.rpttimec);
       tmpc+=g.rpttimec;
-      memcpy(g.hitime,"00:00:00.000",12);
-      memcpy(g.hitime+12-g.rpttimec,g.rpttime,g.rpttimec);
+      memcpy(g.hitime_any,"00:00:00.000",12);
+      memcpy(g.hitime_any+12-g.rpttimec,g.rpttime,g.rpttimec);
     } else {
-      memcmp(tmp+tmpc,g.hitime,sizeof(g.hitime));
-      tmpc+=sizeof(g.hitime);
+      memcpy(tmp+tmpc,g.hitime_any,sizeof(g.hitime_any));
+      tmpc+=sizeof(g.hitime_any);
+    }
+    tmp[tmpc++]=';';
+    if (g.new_hi_time_100) {
+      memcpy(tmp+tmpc,g.rpttime,g.rpttimec);
+      tmpc+=g.rpttimec;
+      memcpy(g.hitime_100,"00:00:00.000",12);
+      memcpy(g.hitime_100+12-g.rpttimec,g.rpttime,g.rpttimec);
+    } else {
+      memcpy(tmp+tmpc,g.hitime_100,sizeof(g.hitime_100));
+      tmpc+=sizeof(g.hitime_100);
     }
     egg_store_set("hiscore",7,tmp,tmpc);
   }
@@ -148,11 +163,9 @@ void hiscore_load() {
   if ((srcc<0)||(srcc>sizeof(src))) srcc=0;
   const char *srcscore=src;
   int srcscorec=0,srcp=0;
-  while ((srcscorec<srcc)&&(src[srcp++]!=';')) srcscorec++;
-  const char *srctime=src+srcp;
-  int srctimec=srcc-srcp;
   
   // Score must be six digits. Default "000000".
+  while ((srcp<srcc)&&(src[srcp++]!=';')) srcscorec++;
   if ((srcscorec==sizeof(g.hiscore))&&all_digits(srcscore,sizeof(g.hiscore))) {
     memcpy(g.hiscore,srcscore,sizeof(g.hiscore));
   } else {
@@ -160,9 +173,19 @@ void hiscore_load() {
   }
   
   // Time may be short at the front. We pad to the full length.
-  memcpy(g.hitime,"00:00:00.000",12);
+  const char *srctime=src+srcp;
+  int srctimec=0;
+  while ((srcp<srcc)&&(src[srcp++]!=';')) srctimec++;
+  memcpy(g.hitime_any,"00:00:00.000",12);
   if (time_valid(srctime,srctimec)) {
-    memcpy(g.hitime+sizeof(g.hitime)-srctimec,srctime,srctimec);
+    memcpy(g.hitime_any+sizeof(g.hitime_any)-srctimec,srctime,srctimec);
+  }
+  srctime=src+srcp;
+  srctimec=0;
+  while ((srcp<srcc)&&(src[srcp++]!=';')) srctimec++;
+  memcpy(g.hitime_100,"00:00:00.000",12);
+  if (time_valid(srctime,srctimec)) {
+    memcpy(g.hitime_100+sizeof(g.hitime_100)-srctimec,srctime,srctimec);
   }
 }
 
@@ -209,6 +232,13 @@ int time_repr(char *text,int texta,double f,int full) {
   text[textc++]='0'+(ms/10)%10;
   text[textc++]='0'+ms%10;
   return textc;
+}
+
+int trim_time(const char *src) {
+  if (!memcmp(src,"00:0",4)) return 4;
+  if (!memcmp(src,"00:",3)) return 3;
+  if (src[0]=='0') return 1;
+  return 0;
 }
  
 int decsint_repr(char *text,int texta,int v) {

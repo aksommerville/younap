@@ -79,9 +79,10 @@ extern struct g {
   char rptscore[6]; // Populated at start of Game Over.
   char rpttime[12]; // ''
   int rpttimec; // 0,8,9,11,12
-  int new_hi_score,new_hi_time; // Nonzero if this recent session set a record.
+  int new_hi_score,new_hi_time_any,new_hi_time_100; // Nonzero if this recent session set a record.
   char hiscore[6];
-  char hitime[12];
+  char hitime_any[12];
+  char hitime_100[12];
 } g;
 
 // main.c
@@ -109,6 +110,7 @@ void score_finalize(); // Populate (g.rptscore,g.rpttime,g.new_hi_score,g.new_hi
 void hiscore_load(); // Sets (g.hiscore,g.hitime). Always fills both fields.
 void game_reset_scores();
 int time_repr(char *dst,int dsta,double s,int full);
+int trim_time(const char *src);
 int decsint_repr(char *dst,int dsta,int v);
 int game_start_level(int mapid);
 void check_bonus(); // Sets (g.bonus_ok) if warranted.
