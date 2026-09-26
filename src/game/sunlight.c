@@ -70,5 +70,6 @@ void check_level_completion(double elapsed) {
   
   if (win) {
     g.level_report=1;
+    SND(winlevel)
   }
 }

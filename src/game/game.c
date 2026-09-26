@@ -237,6 +237,7 @@ int game_start_level(int mapid) {
   g.catc=0;
   g.all_sleep_time=0.0;
   g.mrrrdr=0;
+  g.fishc_level=0;
   g.level_intro=1;
   g.level_report=0;
   g.hello=0;

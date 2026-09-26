@@ -21,3 +21,4 @@ song song:sosweetsox
 sunrate 0x1000
 score 0x0500
 mapmsg "Find\u0020the\u0020sunbeam!"
+sprite @26,4 sprite:fish (u32)0

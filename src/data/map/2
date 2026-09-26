@@ -22,3 +22,7 @@ song song:great_trouble
 sunrate 0x0a00
 score 0x0500
 mapmsg "Down\u0020and\u0020Jump\u0020to\u0020pass\u0020thru\u0020some\u0020platforms."
+sprite @3,12 sprite:fish (u32)0
+sprite @2,7 sprite:fish (u32)0
+sprite @27,1 sprite:fish (u32)0
+sprite @12,1 sprite:fish (u32)0

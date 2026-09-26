@@ -187,7 +187,7 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
 
   /* Y below some level, neutralize and report death.
    */
-  if (sprite->y>NS_sys_maph+2.0) {
+  if (sprite->y>NS_sys_maph+1.0) {
     g.mrrrdr=1;
     SPRITE->climbing=0;
     return;

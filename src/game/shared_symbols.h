@@ -40,8 +40,10 @@
 // Should match everything after 'spriteid' in the CMD_map_sprite args.
 #define NS_sprtype_dummy 0 /* (u32)0 */
 #define NS_sprtype_cat 1 /* (u32)0 */
+#define NS_sprtype_fish 2 /* (u32)0 */
 #define FOR_EACH_SPRTYPE \
   _(dummy) \
-  _(cat)
+  _(cat) \
+  _(fish)
 
 #endif

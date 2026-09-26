@@ -142,6 +142,7 @@ void egg_client_update(double elapsed) {
   /* Reset due to death?
    */
   if (g.mrrrdr) {
+    SND(death)
     g.deathc_total++;
     if (game_start_level(g.mapid)<0) {
       egg_terminate(1);

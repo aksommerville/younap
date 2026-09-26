@@ -147,6 +147,8 @@ void modal_update(double elapsed) {
   else if (g.gameover) result=modal_update_1(&g.gameover,elapsed);
   switch (result) {
     case MODAL_UPDATE_NEXT_LEVEL: {
+        g.fishc_total+=g.fishc_level;
+        g.fishc_level=0;
         if (game_start_level(g.mapid+1)<0) {
           gameover_begin();
         }
