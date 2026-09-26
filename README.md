@@ -22,8 +22,8 @@ Guide the cats to the sunbeams so they can take a nap.
 
 - [x] Stamina and charge indicators.
 - [x] Advance level.
-- [ ] Game over.
-- [ ] Hazards.
+- [x] Game over.
+- [x] Hazards. ...only pits
 - [ ] Multiplayer.
 - [x] Sound effects.
 - [x] Variable sun direction and duration per map.

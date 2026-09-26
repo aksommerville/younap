@@ -140,6 +140,7 @@ void egg_client_update(double elapsed) {
   /* Reset due to death?
    */
   if (g.mrrrdr) {
+    g.deathc_total++;
     if (game_start_level(g.mapid)<0) {
       egg_terminate(1);
       return;
@@ -153,6 +154,7 @@ void egg_client_update(double elapsed) {
   /* Normal stuff when game is running.
    */
   if (game_interactive()) {
+    g.time_total+=elapsed;
     advance_sun(elapsed);
     regenerate_spots();
     require_cat_inputs();

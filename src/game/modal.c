@@ -20,10 +20,12 @@ void hello_begin() {
  */
  
 void hello_render() {
-  graf_fill_rect(&g.graf,0,0,FBW,FBH,0x000000ff);
+  graf_fill_rect(&g.graf,0,0,FBW,FBH,0x002090ff);
+  //TODO Incorporate graphics.
   graf_set_image(&g.graf,RID_image_fonttiles);
-  render_string_centered(FBH>>1,"hello",5);
-  //TODO
+  render_string_centered(200,"You Could Use A Nap!",20);
+  render_string_centered(440,"GDEX Game Jam 2026",18);
+  render_string_centered(460,"By AK Sommerville, Alex Hansen, Aster Kanke",43);
 }
 
 /* Begin Game Over.
@@ -43,8 +45,9 @@ void gameover_begin() {
 void gameover_render() {
   graf_fill_rect(&g.graf,0,0,FBW,FBH,0x000000ff);
   graf_set_image(&g.graf,RID_image_fonttiles);
-  render_string_centered(FBH>>1,"game over",9);
-  //TODO
+  render_string_centered(200,"Game Over",9);
+  render_kv_time(300,"Time",4,g.time_total);
+  render_kv_int(320,"Death",5,g.deathc_total);
 }
 
 /* Generic update.
@@ -102,6 +105,7 @@ void modal_update(double elapsed) {
         }
       } break;
     case MODAL_UPDATE_START_GAME: {
+        game_reset_scores();
         if (game_start_level(1)<0) {
           egg_terminate(1);
         }
@@ -111,35 +115,3 @@ void modal_update(double elapsed) {
       } break;
   }
 }
-/*
-  if (g.level_intro==1) {
-    if (!(g.input[0]&important_buttons)) g.level_intro=2;
-  } else if (g.level_intro==2) {
-    if (g.input[0]&EGG_BTN_SOUTH) {
-      SND(uiactivate)
-      g.level_intro=3;
-    }
-  } else if (g.level_intro==3) {
-    if (!(g.input[0]&important_buttons)) g.level_intro=0;
-    
-  } else if (g.level_report==1) {
-    if (!(g.input[0]&important_buttons)) g.level_report=2;
-  } else if (g.level_report==2) {
-    if (g.input[0]&EGG_BTN_SOUTH) {
-      SND(uiactivate)
-      g.level_report=3;
-    }
-  } else if (g.level_report==3) {
-    if (!(g.input[0]&important_buttons)) {
-      g.level_report=0;
-      if (game_start_level(g.mapid+1)<0) {
-        //TODO game over, you win
-        if (game_start_level(1)<0) {
-          egg_terminate(1);
-          return;
-        }
-      }
-    }
-  }
-}
-/**/

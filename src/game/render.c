@@ -129,8 +129,9 @@ void render_overlay() {
   }
   
   /* Score readout at the bottom.
+   * XXX Feels superfluous.
    */
-  {
+  if (0) {
     double range=1.0;
     double n=g.all_sleep_time;
     int spacing=14;
@@ -158,6 +159,66 @@ void render_string_centered(int y,const char *src,int srcc) {
   if (srcc<0) { srcc=0; while (src[srcc]) srcc++; }
   int x=(FBW>>1)-(srcc*6)+6;
   for (;srcc-->0;src++,x+=12) graf_tile(&g.graf,x,y,*src,0);
+}
+
+/* Key=value field for score report.
+ */
+ 
+void render_kv(int y,const char *k,int kc,const char *v,int vc) {
+  if (!k) kc=0; else if (kc<0) { kc=0; while (k[kc]) kc++; }
+  if (!v) vc=0; else if (vc<0) { vc=0; while (v[vc]) vc++; }
+  int x0=FBW>>1,x;
+  graf_tile(&g.graf,x0,y,':',0);
+  for (x=x0-12;kc-->0;x-=12) graf_tile(&g.graf,x,y,k[kc],0);
+  for (x=x0+24;vc-->0;v++,x+=12) graf_tile(&g.graf,x,y,*v,0);
+}
+
+void render_kv_int(int y,const char *k,int kc,int v) {
+  char text[16];
+  int textc=0;
+  if (v<0) {
+    text[textc++]='-';
+    v=-v;
+    if (v<0) v=INT_MAX; // was INT_MIN
+  }
+  int limit=10,digitc=1;
+  while (v>=limit) { digitc++; if (limit>INT_MAX/10) break; limit*=10; }
+  int i=digitc;
+  for (;i-->0;v/=10) text[textc+i]='0'+v%10;
+  textc+=digitc;
+  render_kv(y,k,kc,text,textc);
+}
+
+void render_kv_time(int y,const char *k,int kc,double f) {
+  int ms=(int)(f*1000.0);
+  if (ms<0) ms=0;
+  int sec=ms/1000; ms%=1000;
+  int min=sec/60; sec%=60;
+  int hour=min/60; min%=60;
+  if (hour>99) { // um, seriously?
+    hour=min=sec=99;
+    ms=999;
+  }
+  char text[16];
+  int textc=0;
+  // Hours only if nonzero; I can't imagine they will ever go above zero.
+  if (hour>=10) text[textc++]='0'+hour/10;
+  if (hour>0) {
+    text[textc++]='0'+hour%10;
+    text[textc++]=':';
+  }
+  // Minutes always present but trim the high digit if zero (mind the hours too).
+  if (hour||(min>=10)) text[textc++]='0'+min/10;
+  text[textc++]='0'+min%10;
+  text[textc++]=':';
+  text[textc++]='0'+sec/10;
+  text[textc++]='0'+sec%10;
+  // Do milliseconds matter? Might as well show I guess.
+  text[textc++]='.';
+  text[textc++]='0'+ms/100;
+  text[textc++]='0'+(ms/10)%10;
+  text[textc++]='0'+ms%10;
+  render_kv(y,k,kc,text,textc);
 }
 
 /* Level intro.

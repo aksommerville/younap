@@ -61,6 +61,12 @@ extern struct g {
   int level_report; // 0,1,2,3 = ''
   int hello;
   int gameover;
+  
+  /* Session score.
+   * Resets when dismissing Hello.
+   */
+  double time_total;
+  int deathc_total;
 } g;
 
 // main.c
@@ -78,8 +84,12 @@ void render_overlay();
 void render_level_intro();
 void render_level_report();
 void render_string_centered(int y,const char *src,int srcc);
+void render_kv(int y,const char *k,int kc,const char *v,int vc);
+void render_kv_int(int y,const char *k,int kc,int v);
+void render_kv_time(int y,const char *k,int kc,double s);
 
 // game.c
+void game_reset_scores();
 int game_start_level(int mapid);
 
 // sunlight.c

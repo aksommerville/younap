@@ -1,19 +1,23 @@
 #include "younap.h"
 
+/* Reset session scores.
+ */
+ 
+void game_reset_scores() {
+  g.time_total=0.0;
+  g.deathc_total=0;
+}
+
 /* Start level.
  */
  
 int game_start_level(int mapid) {
-  fprintf(stderr,"%s(%d)\n",__func__,mapid);
   
   /* Acquire resource, validation dimensions, copy cells.
    */
   const void *serial;
   int serialc=res_get(&serial,EGG_TID_map,mapid);
-  if (serialc<1) {
-    fprintf(stderr,"map:%d not found\n",mapid);//TODO should be our "game over" trigger
-    return -1;
-  }
+  if (serialc<1) return -1;
   struct map_res res;
   if (map_res_decode(&res,serial,serialc)<0) return -1;
   if ((res.w!=NS_sys_mapw)||(res.h!=NS_sys_maph)) return -1;
