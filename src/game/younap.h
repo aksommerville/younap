@@ -59,6 +59,8 @@ extern struct g {
    */
   int level_intro; // 0,1,2,3 = No, Waiting input drop, Waiting confirm, Waiting clear again.
   int level_report; // 0,1,2,3 = ''
+  int hello;
+  int gameover;
 } g;
 
 // main.c
@@ -75,6 +77,7 @@ void render_sprites();
 void render_overlay();
 void render_level_intro();
 void render_level_report();
+void render_string_centered(int y,const char *src,int srcc);
 
 // game.c
 int game_start_level(int mapid);
@@ -83,6 +86,13 @@ int game_start_level(int mapid);
 void advance_sun(double elapsed); // May start a new level.
 void regenerate_spots();
 void check_level_completion(double elapsed);
+
+// modal.c
+void hello_begin();
+void gameover_begin();
+void modal_update(double elapsed);
+void hello_render(); // Overwrites framebuffer.
+void gameover_render(); // Overwrites framebuffer.
 
 #define SND(tag) egg_play_sound(RID_sound_##tag,1.0,0.0);
 

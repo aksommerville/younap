@@ -153,7 +153,7 @@ void render_overlay() {
  * (y) is vertical center.
  */
  
-static void render_string_centered(int y,const char *src,int srcc) {
+void render_string_centered(int y,const char *src,int srcc) {
   if (!src) return;
   if (srcc<0) { srcc=0; while (src[srcc]) srcc++; }
   int x=(FBW>>1)-(srcc*6)+6;

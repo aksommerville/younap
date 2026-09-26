@@ -76,11 +76,7 @@ int egg_client_init() {
   if ((g.bgtexid=egg_texture_new())<1) return -1;
   if (egg_texture_load_raw(g.bgtexid,FBW,FBH,FBW<<2,0,0)<0) return -1;
   
-  if (game_start_level(1)<0) return -1;
-  
-  //egg_play_song(1,RID_song_noodlecat,1,1.0,0.0);
-  //egg_play_song(1,RID_song_great_trouble,1,1.0,0.0);
-  //egg_play_song(1,RID_song_sosweetsox,1,1.0,0.0);
+  hello_begin();
 
   return 0;
 }
@@ -97,6 +93,8 @@ void egg_client_notify(int k,int v) {
 static int game_interactive() {
   if (g.level_intro) return 0;
   if (g.level_report) return 0;
+  if (g.hello) return 0;
+  if (g.gameover) return 0;
   return 1;
 }
 
@@ -150,36 +148,7 @@ void egg_client_update(double elapsed) {
   
   /* Dismiss modal?
    */
-  const int important_buttons=(EGG_BTN_SOUTH|EGG_BTN_WEST);
-  if (g.level_intro==1) {
-    if (!(g.input[0]&important_buttons)) g.level_intro=2;
-  } else if (g.level_intro==2) {
-    if (g.input[0]&EGG_BTN_SOUTH) {
-      SND(uiactivate)
-      g.level_intro=3;
-    }
-  } else if (g.level_intro==3) {
-    if (!(g.input[0]&important_buttons)) g.level_intro=0;
-    
-  } else if (g.level_report==1) {
-    if (!(g.input[0]&important_buttons)) g.level_report=2;
-  } else if (g.level_report==2) {
-    if (g.input[0]&EGG_BTN_SOUTH) {
-      SND(uiactivate)
-      g.level_report=3;
-    }
-  } else if (g.level_report==3) {
-    if (!(g.input[0]&important_buttons)) {
-      g.level_report=0;
-      if (game_start_level(g.mapid+1)<0) {
-        //TODO game over, you win
-        if (game_start_level(1)<0) {
-          egg_terminate(1);
-          return;
-        }
-      }
-    }
-  }
+  modal_update(elapsed);
 
   /* Normal stuff when game is running.
    */
@@ -199,15 +168,21 @@ void egg_client_update(double elapsed) {
 
 void egg_client_render() {
   graf_reset(&g.graf);
-  render_far_bg();
-  render_map();
-  render_sunbeams();
-  render_sprites();
-  render_overlay();
-  if (g.level_intro) {
-    render_level_intro();
-  } else if (g.level_report) {
-    render_level_report();
+  if (g.hello) {
+    hello_render();
+  } else if (g.gameover) {
+    gameover_render();
+  } else {
+    render_far_bg();
+    render_map();
+    render_sunbeams();
+    render_sprites();
+    render_overlay();
+    if (g.level_intro) {
+      render_level_intro();
+    } else if (g.level_report) {
+      render_level_report();
+    }
   }
   graf_flush(&g.graf);
 }

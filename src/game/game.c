@@ -35,6 +35,8 @@ int game_start_level(int mapid) {
   g.mrrrdr=0;
   g.level_intro=1;
   g.level_report=0;
+  g.hello=0;
+  g.gameover=0;
   sprites_nuke();
   
   /* Read commands.
