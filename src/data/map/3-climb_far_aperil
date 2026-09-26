@@ -26,3 +26,4 @@ song song:great_trouble
 sunrate 0x0800
 score 0x0a00
 bonus (u16:bonus)different_sunbeams
+mapmsg "climb_far_aperil"

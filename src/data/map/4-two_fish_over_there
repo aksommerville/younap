@@ -21,6 +21,6 @@ window @11,3 2 2
 song song:sosweetsox
 sunrate 0x0800
 score 0x0a00
-mapmsg ""
 bonus (u16:bonus)no_jump
 sprite @28,2 sprite:fish (u32)0
+mapmsg "two_fish_over_there"

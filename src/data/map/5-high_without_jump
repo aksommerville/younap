@@ -22,8 +22,8 @@ sprite @21,1 sprite:fish (u32)0
 song song:noodlecat
 sunrate 0x0800
 score 0x0a00
-mapmsg ""
 bonus (u16:bonus)no_jump
 window @4,10 1 1
 window @14,11 2 2
 window @25,9 1 1
+mapmsg "high_without_jump"
