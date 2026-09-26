@@ -9,6 +9,7 @@
 #define STAMINA_MAX    2.0 /* s */
 #define SLEEP_TIME_MIN 1.000 /* s */
 #define WAKE_TIME_MIN  1.000 /* s */
+#define NAME_TATTLE_TIME 2.000
 
 // Enumerate the various faces, so we can detect changes without checking a bunch of different state every time.
 #define FACE_IDLE 0
@@ -41,6 +42,7 @@ struct sprite_cat {
   double wall_damage_clock;
   double zanimclock;
   int zanimframe;
+  double name_tattle;
 };
 
 #define SPRITE ((struct sprite_cat*)sprite)
@@ -186,6 +188,8 @@ static void cat_update_wall_damage(struct sprite *sprite,double elapsed) {
  */
  
 static void _cat_update(struct sprite *sprite,double elapsed) {
+
+  if (SPRITE->name_tattle>0.0) SPRITE->name_tattle-=elapsed;
 
   /* Y below some level, neutralize and report death.
    */
@@ -483,8 +487,21 @@ static void _cat_render(struct sprite *sprite,int x,int y) {
   
   /* Zs when sleeping.
    */
+  graf_set_image(&g.graf,sprite->imageid);
   if (SPRITE->sleeping) {
     graf_tile(&g.graf,x,y-20,0x80+SPRITE->zanimframe,0);
+  }
+  
+  /* Name tattle after we've just been switched on.
+   */
+  if (SPRITE->name_tattle>0.0) {
+    if (SPRITE->name_tattle<1.0) {
+      int alpha=(int)(SPRITE->name_tattle*255.0);
+      if (alpha<0) alpha=0; else if (alpha>0xff) alpha=0xff;
+      graf_set_alpha(&g.graf,alpha);
+    }
+    graf_tile(&g.graf,x,y-NS_sys_tilesize,sprite->tileid+0x0f,0);
+    graf_set_alpha(&g.graf,0xff);
   }
 }
 
@@ -534,6 +551,7 @@ void require_cat_inputs() {
     if (available) {
       struct sprite *sprite=available;
       SPRITE->input=1;
+      SPRITE->name_tattle=NAME_TATTLE_TIME;
     }
   }
 }
@@ -570,6 +588,7 @@ void cat_shuffle_input(int playerid,int d) {
     else if (np>=catc) np=0;
     ((struct sprite_cat*)catv[cat_focusp])->input=-1;
     ((struct sprite_cat*)catv[np])->input=playerid;
+    ((struct sprite_cat*)catv[np])->name_tattle=NAME_TATTLE_TIME;
   } else { // Pick any.
     if (catc<1) return; // ...nope!
     ((struct sprite_cat*)catv[0])->input=playerid;
