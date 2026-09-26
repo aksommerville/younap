@@ -17,7 +17,7 @@
 image image:sprites
 window @18,6 2 2
 sprite @3,10 sprite:binx (u32)0
-song song:fishie_fishie
+song song:sosweetsox
 sunrate 0x1000
 score 0x0500
 mapmsg "Find\u0020the\u0020sunbeam!"
