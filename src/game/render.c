@@ -175,49 +175,13 @@ void render_kv(int y,const char *k,int kc,const char *v,int vc) {
 
 void render_kv_int(int y,const char *k,int kc,int v) {
   char text[16];
-  int textc=0;
-  if (v<0) {
-    text[textc++]='-';
-    v=-v;
-    if (v<0) v=INT_MAX; // was INT_MIN
-  }
-  int limit=10,digitc=1;
-  while (v>=limit) { digitc++; if (limit>INT_MAX/10) break; limit*=10; }
-  int i=digitc;
-  for (;i-->0;v/=10) text[textc+i]='0'+v%10;
-  textc+=digitc;
+  int textc=decsint_repr(text,sizeof(text),v);
   render_kv(y,k,kc,text,textc);
 }
 
 void render_kv_time(int y,const char *k,int kc,double f) {
-  int ms=(int)(f*1000.0);
-  if (ms<0) ms=0;
-  int sec=ms/1000; ms%=1000;
-  int min=sec/60; sec%=60;
-  int hour=min/60; min%=60;
-  if (hour>99) { // um, seriously?
-    hour=min=sec=99;
-    ms=999;
-  }
   char text[16];
-  int textc=0;
-  // Hours only if nonzero; I can't imagine they will ever go above zero.
-  if (hour>=10) text[textc++]='0'+hour/10;
-  if (hour>0) {
-    text[textc++]='0'+hour%10;
-    text[textc++]=':';
-  }
-  // Minutes always present but trim the high digit if zero (mind the hours too).
-  if (hour||(min>=10)) text[textc++]='0'+min/10;
-  text[textc++]='0'+min%10;
-  text[textc++]=':';
-  text[textc++]='0'+sec/10;
-  text[textc++]='0'+sec%10;
-  // Do milliseconds matter? Might as well show I guess.
-  text[textc++]='.';
-  text[textc++]='0'+ms/100;
-  text[textc++]='0'+(ms/10)%10;
-  text[textc++]='0'+ms%10;
+  int textc=time_repr(text,sizeof(text),f,0);
   render_kv(y,k,kc,text,textc);
 }
 

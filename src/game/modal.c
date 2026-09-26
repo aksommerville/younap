@@ -26,6 +26,26 @@ void hello_render() {
   render_string_centered(200,"You Could Use A Nap!",20);
   render_string_centered(440,"GDEX Game Jam 2026",18);
   render_string_centered(460,"By AK Sommerville, Alex Hansen, Aster Kanke",43);
+  
+  /* Show best score and time if present.
+   */
+  if (memcmp(g.hiscore,"000000",6)||memcmp(g.hitime,"00:00:00.000",12)) {
+    char msg[128];
+    memcpy(msg,"Record: ",8);
+    int msgc=8;
+    memcpy(msg+msgc,g.hiscore,sizeof(g.hiscore));
+    msgc+=sizeof(g.hiscore);
+    msg[msgc++]=' ';
+    msg[msgc++]='/';
+    msg[msgc++]=' ';
+    int trimc=0;
+    if (!memcmp(g.hitime,"00:0",4)) trimc=4;
+    else if (!memcmp(g.hitime,"00",2)) trimc=3;
+    else if (g.hitime[0]=='0') trimc=1;
+    memcpy(msg+msgc,g.hitime+trimc,sizeof(g.hitime)-trimc);
+    msgc+=sizeof(g.hitime)-trimc;
+    render_string_centered(360,msg,msgc);
+  }
 }
 
 /* Begin Game Over.
@@ -37,6 +57,8 @@ void gameover_begin() {
   g.hello=0;
   g.gameover=1;
   play_song(RID_song_fishie_fishie);
+  
+  score_finalize();
 }
 
 /* Render Game Over.
@@ -45,9 +67,34 @@ void gameover_begin() {
 void gameover_render() {
   graf_fill_rect(&g.graf,0,0,FBW,FBH,0x000000ff);
   graf_set_image(&g.graf,RID_image_fonttiles);
-  render_string_centered(200,"Game Over",9);
-  render_kv_time(300,"Time",4,g.time_total);
-  render_kv_int(320,"Death",5,g.deathc_total);
+  
+  int y=150;
+  render_string_centered(y,"Game Over",9);
+  y+=40;
+  
+  render_kv(y,"Score",5,g.rptscore,sizeof(g.rptscore)); y+=20;
+  render_kv(y,"Time",4,g.rpttime,g.rpttimec); y+=20;
+  render_kv_int(y,"Death",5,g.deathc_total); y+=20;
+  render_kv_int(y,"Fish",4,g.fishc_total); y+=20;
+  y+=20;
+  
+  if (g.new_hi_score) {
+    render_string_centered(y,"New high score!",15);
+    y+=20;
+  } else if (memcmp(g.hiscore,"000000",6)) {
+    render_kv(y,"High score",10,g.hiscore,6);
+    y+=20;
+  }
+  if (g.new_hi_time) {
+    render_string_centered(y,"New best time!",14);
+    y+=20;
+  } else if (memcmp(g.hitime,"00:00:00.000",12)) {
+    int trimc=0;
+    if (!memcmp(g.hitime,"00:0",4)) trimc=4;
+    else if (!memcmp(g.hitime,"00",2)) trimc=3;
+    else if (g.hitime[0]=='0') trimc=1;
+    render_kv(y,"Best time",9,g.hitime+trimc,12-trimc); y+=20;
+  }
 }
 
 /* Generic update.

@@ -67,6 +67,13 @@ extern struct g {
    */
   double time_total;
   int deathc_total;
+  int fishc_total;
+  char rptscore[6]; // Populated at start of Game Over.
+  char rpttime[12]; // ''
+  int rpttimec; // 0,8,9,11,12
+  int new_hi_score,new_hi_time; // Nonzero if this recent session set a record.
+  char hiscore[6];
+  char hitime[12];
 } g;
 
 // main.c
@@ -89,7 +96,11 @@ void render_kv_int(int y,const char *k,int kc,int v);
 void render_kv_time(int y,const char *k,int kc,double s);
 
 // game.c
+void score_finalize(); // Populate (g.rptscore,g.rpttime,g.new_hi_score,g.new_hi_time), compare to "hi", save if warranted.
+void hiscore_load(); // Sets (g.hiscore,g.hitime). Always fills both fields.
 void game_reset_scores();
+int time_repr(char *dst,int dsta,double s,int full);
+int decsint_repr(char *dst,int dsta,int v);
 int game_start_level(int mapid);
 
 // sunlight.c

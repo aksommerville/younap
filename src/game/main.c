@@ -76,6 +76,8 @@ int egg_client_init() {
   if ((g.bgtexid=egg_texture_new())<1) return -1;
   if (egg_texture_load_raw(g.bgtexid,FBW,FBH,FBW<<2,0,0)<0) return -1;
   
+  hiscore_load();
+  
   hello_begin();
 
   return 0;

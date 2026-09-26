@@ -1,11 +1,211 @@
 #include "younap.h"
 
+/* Score validation.
+ */
+ 
+static int all_digits(const char *src,int srcc) {
+  for (;srcc-->0;src++) if ((*src<'0')||(*src>'9')) return 0;
+  return 1;
+}
+
+static int time_valid(const char *src,int srcc) {
+  // Read back to front. Any suffix of the full valid time "00:00:00.000" is valid.
+  #define DIGIT { \
+    if (srcc<=0) return 1; \
+    srcc--; \
+    if ((src[srcc]<'0')||(src[srcc]>'9')) return 0; \
+  }
+  #define LITERAL(ch) { \
+    if (srcc<=0) return 1; \
+    if (src[--srcc]!=ch) return 0; \
+  }
+  DIGIT DIGIT DIGIT
+  LITERAL('.')
+  DIGIT DIGIT
+  LITERAL(':')
+  DIGIT DIGIT
+  LITERAL(':')
+  DIGIT DIGIT
+  #undef DIGIT
+  #undef LITERAL
+  if (srcc>0) return 0;
+  return 1;
+}
+
+/* Nonzero if (a) is better than (b). Not equal.
+ */
+ 
+static int time_better(const char *a,int ac,const char *b,int bc) {
+  if (!a) ac=0; else if (ac<0) { ac=0; while (a[ac]) ac++; }
+  if (!b) bc=0; else if (bc<0) { bc=0; while (b[bc]) bc++; }
+  // Trim zero, colon, and dot from the start of each.
+  while (ac&&((*a=='0')||(*a==':')||(*a=='.'))) { ac--; a++; }
+  while (bc&&((*b=='0')||(*b==':')||(*b=='.'))) { bc--; b++; }
+  // If one is empty, the other is better.
+  if (!bc) return ac?1:0;
+  // Shorter is better.
+  if (ac<bc) return 1;
+  if (ac>bc) return 0;
+  // Compare lexically. Earlier is better.
+  return (memcmp(a,b,ac)<0);
+}
+
+/* Finalize session score.
+ */
+ 
+void score_finalize() {
+
+  /* Parameters for computing score.
+   * We're not going to read anything dynamically off the maps; just hard-code the parameters here.
+   */
+  const double time_min=((( 1.0 )))*60.0+((( 0.0 ))); // ((( M ))):((( S ))) ; At or below this time you get a perfect score.
+  const double time_max=((( 5.0 )))*60.0+((( 0.0 ))); // ((( M ))):((( S ))) ; Above this time you get no time points.
+  const int fish_max=10; // Count of fish in the world.
+  const int death_max=5; // Above this you get no death points.
+  const int time_weight= 500000; // Portion of the million awarded per time.
+  const int fish_weight= 200000; // Portion of the million awarded per fish.
+  const int death_weight=200000; // Portion of the million awarded per death count.
+  const int pity_points= 100000; // If they completed the game at all, a minimum score. (I like 100k exactly, so there's never a leading zero).
+  if (time_weight+fish_weight+death_weight+pity_points!=1000000) {
+    fprintf(stderr,"%s:%d: hey doofus, the score parameters don't add up\n",__FILE__,__LINE__);
+  }
+  
+  /* Compute score.
+   */
+  double time_score=1.0-((g.time_total-time_min)/(time_max/time_min));
+  if (time_score<0.0) time_score=0.0; else if (time_score>1.0) time_score=1.0;
+  double fish_score=(double)g.fishc_total/(double)fish_max;
+  if (fish_score>1.0) fish_score=1.0;
+  double death_score=1.0-(double)g.deathc_total/(double)death_max;
+  if (death_score<0.0) death_score=0.0;
+  int score=(int)(time_score*time_weight+fish_score*fish_weight+death_score*death_weight+pity_points);
+  if (score<pity_points) score=pity_points;
+  else if (score>999999) score=999999;
+  
+  /* Serialize time and score for reporting.
+   */
+  g.rpttimec=time_repr(g.rpttime,sizeof(g.rpttime),g.time_total,0);
+  g.rptscore[0]='0'+(score/100000)%10;
+  g.rptscore[1]='0'+(score/10000 )%10;
+  g.rptscore[2]='0'+(score/1000  )%10;
+  g.rptscore[3]='0'+(score/100   )%10;
+  g.rptscore[4]='0'+(score/10    )%10;
+  g.rptscore[5]='0'+(score/1     )%10;
+  
+  /* Check whether score or time sets a new record. They compare independently.
+   */
+  if (memcmp(g.rptscore,g.hiscore,sizeof(g.rptscore))>1) {
+    g.new_hi_score=1;
+  } else {
+    g.new_hi_score=0;
+  }
+  if (time_better(g.rpttime,g.rpttimec,g.hitime,sizeof(g.hitime))) {
+    g.new_hi_time=1;
+  } else {
+    g.new_hi_time=0;
+  }
+  
+  /* If a new record was set, encode and save it.
+   */
+  if (g.new_hi_score||g.new_hi_time) {
+    char tmp[20];
+    int tmpc=0;
+    memcpy(tmp,g.rptscore,sizeof(g.rptscore));
+    tmpc=sizeof(g.rptscore);
+    tmp[tmpc++]=';';
+    memcpy(tmp+tmpc,g.rpttime,g.rpttimec);
+    tmpc+=g.rpttimec;
+    egg_store_set("hiscore",7,tmp,tmpc);
+    memcpy(g.hiscore,g.rptscore,sizeof(g.rptscore));
+    memcpy(g.hitime,"00:00:00.000",12);
+    memcpy(g.hitime+12-g.rpttimec,g.rpttime,g.rpttimec);
+  }
+}
+
+/* Load high score.
+ */
+ 
+void hiscore_load() {
+  char src[32];
+  int srcc=egg_store_get(src,sizeof(src),"hiscore",7);
+  if ((srcc<0)||(srcc>sizeof(src))) srcc=0;
+  const char *srcscore=src;
+  int srcscorec=0,srcp=0;
+  while ((srcscorec<srcc)&&(src[srcp++]!=';')) srcscorec++;
+  const char *srctime=src+srcp;
+  int srctimec=srcc-srcp;
+  
+  // Score must be six digits. Default "000000".
+  if ((srcscorec==sizeof(g.hiscore))&&all_digits(srcscore,sizeof(g.hiscore))) {
+    memcpy(g.hiscore,srcscore,sizeof(g.hiscore));
+  } else {
+    memset(g.hiscore,'0',sizeof(g.hiscore));
+  }
+  
+  // Time may be short at the front. We pad to the full length.
+  memcpy(g.hitime,"00:00:00.000",12);
+  if (time_valid(srctime,srctimec)) {
+    memcpy(g.hitime+sizeof(g.hitime)-srctimec,srctime,srctimec);
+  }
+}
+
 /* Reset session scores.
  */
  
 void game_reset_scores() {
   g.time_total=0.0;
   g.deathc_total=0;
+  g.fishc_total=0;
+}
+
+/* Time or integer as a string.
+ * NB: We're accepting the output vector length but not checking it. Caller should always provide sufficient space.
+ */
+ 
+int time_repr(char *text,int texta,double f,int full) {
+  int ms=(int)(f*1000.0);
+  if (ms<0) ms=0;
+  int sec=ms/1000; ms%=1000;
+  int min=sec/60; sec%=60;
+  int hour=min/60; min%=60;
+  if (hour>99) { // um, seriously?
+    hour=min=sec=99;
+    ms=999;
+  }
+  int textc=0;
+  // Hours only if nonzero; I can't imagine they will ever go above zero.
+  if (full||(hour>=10)) text[textc++]='0'+hour/10;
+  if (full||(hour>0)) {
+    text[textc++]='0'+hour%10;
+    text[textc++]=':';
+  }
+  // Minutes always present but trim the high digit if zero (mind the hours too).
+  if (full||hour||(min>=10)) text[textc++]='0'+min/10;
+  text[textc++]='0'+min%10;
+  text[textc++]=':';
+  text[textc++]='0'+sec/10;
+  text[textc++]='0'+sec%10;
+  // Do milliseconds matter? Might as well show I guess.
+  text[textc++]='.';
+  text[textc++]='0'+ms/100;
+  text[textc++]='0'+(ms/10)%10;
+  text[textc++]='0'+ms%10;
+  return textc;
+}
+ 
+int decsint_repr(char *text,int texta,int v) {
+  int textc=0;
+  if (v<0) {
+    text[textc++]='-';
+    v=-v;
+    if (v<0) v=INT_MAX; // was INT_MIN
+  }
+  int limit=10,digitc=1;
+  while (v>=limit) { digitc++; if (limit>INT_MAX/10) break; limit*=10; }
+  int i=digitc;
+  for (;i-->0;v/=10) text[textc+i]='0'+v%10;
+  textc+=digitc;
+  return textc;
 }
 
 /* Start level.
