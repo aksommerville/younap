@@ -46,7 +46,7 @@ void render_sunbeams() {
   graf_set_input(&g.graf,0);
   struct window *window=g.windowv;
   int i=g.windowc;
-  uint32_t ray_color=0xffff0080;
+  uint32_t ray_color=0xffe040ff;
   for (window=g.windowv,i=g.windowc;i-->0;window++) {
     if (window->beaml<window->x) {
       graf_triangle_strip_begin(&g.graf,
