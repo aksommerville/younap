@@ -8,6 +8,7 @@
 #define JUMP_DECEL    20.0 /* m/s**2 */
 #define STAMINA_MAX    2.0 /* s */
 #define SLEEP_TIME_MIN 1.000 /* s */
+#define WAKE_TIME_MIN  1.000 /* s */
 
 // Enumerate the various faces, so we can detect changes without checking a bunch of different state every time.
 #define FACE_IDLE 0
@@ -36,6 +37,7 @@ struct sprite_cat {
   double stamina;
   double jumpdx;
   double sleeptime; // s, this nap. So we can enforce the minimum.
+  double waketime;
   double wall_damage_clock;
   double zanimclock;
   int zanimframe;
@@ -192,6 +194,8 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
     SPRITE->climbing=0;
     return;
   }
+  
+  if (!SPRITE->sleeping) SPRITE->waketime+=elapsed;
 
   /* If I'm standing in a sunbeam, I fall asleep and if not, I wake up.
    * Regardless of whether I'm currently bound to an input.
@@ -202,6 +206,9 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
     if (SPRITE->sleeping&&(SPRITE->sleeptime<SLEEP_TIME_MIN)) {
       // If we only just fell asleep, stay that way for at least some tasteful interval, don't even check.
       nsleeping=1;
+    } else if (!SPRITE->sleeping&&(SPRITE->waketime<WAKE_TIME_MIN)) {
+      // Similar clock for awake too.
+      nsleeping=0;
     } else {
       int floory=(int)(sprite->y+1.0);
       struct window *window=g.windowv;
@@ -233,10 +240,12 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
     if (SPRITE->sleeping) {
       SND(wake)
       SPRITE->sleeping=0;
+      SPRITE->waketime=0.0;
     }
   } else if (SPRITE->sleeping) {
     SND(wake)
     SPRITE->sleeping=0;
+    SPRITE->waketime=0.0;
   }
   
   /* Gather input.

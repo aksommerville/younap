@@ -193,14 +193,14 @@ void render_level_report() {
   if (g.level_report>=3) return;
   graf_set_image(&g.graf,RID_image_fonttiles);
   int y=200;
-  render_string_centered(y,"Well napped!",-1); y+=100;
+  render_string_centered(y,"Well napped!",-1); y+=40;
   if (g.bonus) {
     if (g.bonus_ok) {
       render_string_centered(y,"Bonus awarded!",-1);
     } else {
       render_string_centered(y,"No bonus.",-1);
     }
-    y+=100;
+    y+=40;
   }
   render_string_centered(y,"Jump to proceed",-1);
 }

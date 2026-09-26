@@ -20,15 +20,20 @@ void hello_begin() {
  */
  
 void hello_render() {
-  graf_fill_rect(&g.graf,0,0,FBW,FBH,0x002090ff);
-  //TODO Incorporate graphics.
-  graf_set_image(&g.graf,RID_image_fonttiles);
-  render_string_centered(200,"You Could Use A Nap!",20);
-  render_string_centered(440,"GDEX Game Jam 2026",18);
-  render_string_centered(460,"By AK Sommerville, Alex Hansen, Aster Kanke",43);
+  graf_fill_rect(&g.graf,0,0,FBW,FBH,0xffded1ff);
+  
+  graf_set_image(&g.graf,RID_image_titlebg);
+  graf_decal(&g.graf,0,FBH-300,0,0,FBW,300);
+  
+  graf_set_image(&g.graf,RID_image_titletext);
+  graf_decal(&g.graf,(FBW>>1)-135,30,0,0,270,240);
+  
+  // I'd like to render the cats and snores as tiles so we can animate them. But the static ones are scaled up.
   
   /* Show best score and time if present.
    */
+  graf_set_image(&g.graf,RID_image_fonttiles);
+  graf_set_tint(&g.graf,0x000000ff);
   int y=320;
   if (memcmp(g.hiscore,"000000",6)) {
     render_kv(y,"High score",10,g.hiscore,sizeof(g.hiscore));
@@ -44,6 +49,7 @@ void hello_render() {
     render_kv(y,"Full clear",10,g.hitime_100+trimc,12-trimc);
     y+=20;
   }
+  graf_set_tint(&g.graf,0);
 }
 
 /* Begin Game Over.
