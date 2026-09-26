@@ -26,3 +26,4 @@ sprite @3,12 sprite:fish (u32)0
 sprite @2,7 sprite:fish (u32)0
 sprite @27,1 sprite:fish (u32)0
 sprite @12,1 sprite:fish (u32)0
+bonus (u16:bonus)no_jump

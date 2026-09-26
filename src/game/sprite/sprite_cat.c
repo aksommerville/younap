@@ -283,6 +283,7 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
         if (!sprite_move(sprite,0.0,dy*elapsed)&&(dy>0.0)) {
           SPRITE->climbing=0;
         } else {
+          g.climbtime_level+=elapsed;
           cat_update_wall_damage(sprite,elapsed);
           cat_animate(sprite,elapsed);
           return;
@@ -306,6 +307,7 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
   } else if (SPRITE->charging) {
     if (!injump) {
       // Charge=>Jump.
+      g.jumpc_level++;
       SND(jump)
       SPRITE->charging=0;
       SPRITE->jumping=1;

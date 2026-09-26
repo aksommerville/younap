@@ -17,6 +17,7 @@
 #define CMD_map_song      0x21 /* u16:songid */
 #define CMD_map_sunrate   0x22 /* u0.16:rate ; transits/second */
 #define CMD_map_score     0x23 /* u8.8:sec */
+#define CMD_map_bonus     0x24 /* u16:bonus */
 #define CMD_map_window    0x40 /* u16:position u8:w u8:h */
 #define CMD_map_sprite    0x61 /* u16:position, u16:spriteid, u32:arg */
 #define CMD_map_door      0x62 /* u16:position, u16:mapid, u16:dstposition, u16:arg */
@@ -35,6 +36,12 @@
 #define NS_physics_solid 1
 #define NS_physics_oneway 2
 #define NS_physics_slippy 3 /* vacant but cats can't climb on it */
+
+#define NS_bonus_none 0 /* Default */
+#define NS_bonus_different_sunbeams 1 /* Each cat must have a sunbeam to itself. */
+#define NS_bonus_same_sunbeam 2 /* All cats must be in the same sunbeam. */
+#define NS_bonus_no_climb 3 /* Do it without climbing. */
+#define NS_bonus_no_jump 4 /* Do it without jumping. */
 
 // Editor uses the comment after a 'sprtype' symbol as a prompt in the new-sprite modal.
 // Should match everything after 'spriteid' in the CMD_map_sprite args.

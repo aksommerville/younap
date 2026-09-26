@@ -27,3 +27,4 @@ score 0x0a00
 mapmsg "Everybody\u0020needs\u0020to\u0020sleep\u0020at\u0020the\u0020same\u0020time."
 sprite @28,1 sprite:fish (u32)0
 sprite @1,1 sprite:fish (u32)0
+bonus (u16:bonus)same_sunbeam

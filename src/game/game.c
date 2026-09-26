@@ -62,11 +62,12 @@ void score_finalize() {
   const double time_max=((( 5.0 )))*60.0+((( 0.0 ))); // ((( M ))):((( S ))) ; Above this time you get no time points.
   const int fish_max=10; // Count of fish in the world.
   const int death_max=5; // Above this you get no death points.
-  const int time_weight= 500000; // Portion of the million awarded per time.
+  const int time_weight= 300000; // Portion of the million awarded per time.
+  const int bonus_weight=200000; // '' per bonuses.
   const int fish_weight= 200000; // Portion of the million awarded per fish.
   const int death_weight=200000; // Portion of the million awarded per death count.
   const int pity_points= 100000; // If they completed the game at all, a minimum score. (I like 100k exactly, so there's never a leading zero).
-  if (time_weight+fish_weight+death_weight+pity_points!=1000000) {
+  if (time_weight+bonus_weight+fish_weight+death_weight+pity_points!=1000000) {
     fprintf(stderr,"%s:%d: hey doofus, the score parameters don't add up\n",__FILE__,__LINE__);
   }
   
@@ -74,11 +75,16 @@ void score_finalize() {
    */
   double time_score=1.0-((g.time_total-time_min)/(time_max/time_min));
   if (time_score<0.0) time_score=0.0; else if (time_score>1.0) time_score=1.0;
+  double bonus_score=1.0; // If we forgot to assign any, give them the points.
+  if (g.bonusc_possible) {
+    bonus_score=(double)g.bonusc_total/(double)g.bonusc_possible;
+    if (bonus_score>1.0) bonus_score=1.0;
+  }
   double fish_score=(double)g.fishc_total/(double)fish_max;
   if (fish_score>1.0) fish_score=1.0;
   double death_score=1.0-(double)g.deathc_total/(double)death_max;
   if (death_score<0.0) death_score=0.0;
-  int score=(int)(time_score*time_weight+fish_score*fish_weight+death_score*death_weight+pity_points);
+  int score=(int)(time_score*time_weight+bonus_score*bonus_weight+fish_score*fish_weight+death_score*death_weight+pity_points);
   if (score<pity_points) score=pity_points;
   else if (score>999999) score=999999;
   
@@ -156,6 +162,8 @@ void game_reset_scores() {
   g.time_total=0.0;
   g.deathc_total=0;
   g.fishc_total=0;
+  g.bonusc_total=0;
+  g.bonusc_possible=0;
 }
 
 /* Time or integer as a string.
@@ -238,6 +246,10 @@ int game_start_level(int mapid) {
   g.all_sleep_time=0.0;
   g.mrrrdr=0;
   g.fishc_level=0;
+  g.jumpc_level=0;
+  g.climbtime_level=0.0;
+  g.bonus=NS_bonus_none;
+  g.bonus_ok=0;
   g.level_intro=1;
   g.level_report=0;
   g.hello=0;
@@ -254,6 +266,7 @@ int game_start_level(int mapid) {
       case CMD_map_song: play_song((cmd.arg[0]<<8)|cmd.arg[1]); break;
       case CMD_map_sunrate: g.sundp=((cmd.arg[0]<<8)|cmd.arg[1])/65535.0; break;
       case CMD_map_score: g.leveltime=((cmd.arg[0]<<8)|cmd.arg[1])/256.0; break;
+      case CMD_map_bonus: g.bonus=(cmd.arg[0]<<8)|cmd.arg[1]; break;
     
       case CMD_map_window: if (g.windowc<WINDOW_LIMIT) {
           struct window *window=g.windowv+g.windowc++;
@@ -339,4 +352,72 @@ int game_start_level(int mapid) {
   regenerate_spots();
   
   return 0;
+}
+
+/* Which sunbeam is each cat napping in?
+ * Skip awake cats.
+ */
+ 
+static int identify_sunbeams_by_cat(int *dstv,int dsta) {
+  int dstc=0;
+  struct sprite **spritep=spritev;
+  int spritei=spritec;
+  for (;spritei-->0;spritep++) {
+    struct sprite *sprite=*spritep;
+    if (sprite->defunct||(sprite->type!=&sprite_type_cat)) continue;
+    if (!sprite_cat_is_sleeping(sprite)) continue;
+    if (dstc>=dsta) break;
+    const struct window *window=g.windowv;
+    int windowi=g.windowc;
+    for (;windowi-->0;window++) {
+      if (sprite->x<window->beaml-0.5) continue;
+      if (sprite->x>window->beamr+0.5) continue;
+      if (sprite->y>window->floory) continue;
+      if (sprite->y<window->floory-1.0) continue;
+      dstv[dstc++]=windowi+1;
+      break;
+    }
+  }
+  return dstc;
+}
+
+/* Check bonus condition, at end of level.
+ */
+ 
+void check_bonus() {
+  switch (g.bonus) {
+  
+    case NS_bonus_different_sunbeams: {
+        int v[8];
+        int c=identify_sunbeams_by_cat(v,8);
+        if (c>0) {
+          g.bonus_ok=1;
+          int ai=c; while (ai-->0) {
+            int bi=ai; while (bi-->0) {
+              if (v[ai]==v[bi]) {
+                g.bonus_ok=0;
+              }
+            }
+          }
+        }
+      } break;
+      
+    case NS_bonus_same_sunbeam: {
+        int v[8];
+        int c=identify_sunbeams_by_cat(v,8);
+        if (c>0) {
+          g.bonus_ok=1;
+          const int *p=v;
+          for (;c-->0;p++) if (*p!=v[0]) g.bonus_ok=0;
+        }
+      } break;
+      
+    case NS_bonus_no_climb: {
+        if (g.climbtime_level<=0.0) g.bonus_ok=1;
+      } break;
+      
+    case NS_bonus_no_jump: {
+        if (!g.jumpc_level) g.bonus_ok=1;
+      } break;
+  }
 }

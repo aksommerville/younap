@@ -179,6 +179,16 @@ void render_kv_int(int y,const char *k,int kc,int v) {
   render_kv(y,k,kc,text,textc);
 }
 
+void render_kv_int2(int y,const char *k,int kc,int numer,int denom) {
+  char text[32];
+  int textc=decsint_repr(text,sizeof(text),numer);
+  text[textc++]=' ';
+  text[textc++]='/';
+  text[textc++]=' ';
+  textc+=decsint_repr(text+textc,sizeof(text)-textc,denom);
+  render_kv(y,k,kc,text,textc);
+}
+
 void render_kv_time(int y,const char *k,int kc,double f) {
   char text[16];
   int textc=time_repr(text,sizeof(text),f,0);
@@ -192,8 +202,19 @@ void render_level_intro() {
   graf_fill_rect(&g.graf,0,0,FBW,FBH,0x000000c0);
   if (g.level_intro>=3) return; // Text disappears when you press A, but the blotter lingers until you release it.
   graf_set_image(&g.graf,RID_image_fonttiles);
-  render_string_centered((FBH>>1)-20,g.mapmsg,g.mapmsgc);
-  render_string_centered((FBH>>1)+20,"Press jump to begin",-1);
+  int y=(FBH>>1)-20;
+  render_string_centered(y,g.mapmsg,g.mapmsgc); y+=40;
+  if (g.bonus) {
+    switch (g.bonus) {
+      case NS_bonus_different_sunbeams: render_string_centered(y,"Bonus: One cat per sunbeam.",-1); break;
+      case NS_bonus_same_sunbeam: render_string_centered(y,"Bonus: All cats in the same sunbeam.",-1); break;
+      case NS_bonus_no_jump: render_string_centered(y,"Bonus: Complete without jumping.",-1); break;
+      case NS_bonus_no_climb: render_string_centered(y,"Bonus: Complete without climbing.",-1); break;
+      default: render_string_centered(y,"UNEXPECTED BONUS. Please update render_level_intro()",-1); break;
+    }
+    y+=40;
+  }
+  render_string_centered(y,"Press jump to begin",-1);
 }
 
 /* Level report.
@@ -203,6 +224,15 @@ void render_level_report() {
   graf_fill_rect(&g.graf,0,0,FBW,FBH,0x000000c0);
   if (g.level_report>=3) return;
   graf_set_image(&g.graf,RID_image_fonttiles);
-  render_string_centered(200,"Well napped!",-1);
-  render_string_centered(400,"Jump to proceed",-1);
+  int y=200;
+  render_string_centered(y,"Well napped!",-1); y+=100;
+  if (g.bonus) {
+    if (g.bonus_ok) {
+      render_string_centered(y,"Bonus awarded!",-1);
+    } else {
+      render_string_centered(y,"No bonus.",-1);
+    }
+    y+=100;
+  }
+  render_string_centered(y,"Jump to proceed",-1);
 }

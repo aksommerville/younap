@@ -10,7 +10,7 @@ Guide the cats to the sunbeams so they can take a nap.
 
 - [x] Bonus fish.
 - [x] Multiplayer.
-- [ ] Bonus condition per map.
+- [x] Bonus condition per map.
 - [ ] Provisional level set.
 - [ ] Final level set.
 - [ ] Final graphics and sound.

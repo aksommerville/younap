@@ -76,6 +76,7 @@ void gameover_render() {
   render_kv(y,"Time",4,g.rpttime,g.rpttimec); y+=20;
   render_kv_int(y,"Death",5,g.deathc_total); y+=20;
   render_kv_int(y,"Fish",4,g.fishc_total); y+=20;
+  if (g.bonusc_possible) { render_kv_int2(y,"Bonus",5,g.bonusc_total,g.bonusc_possible); y+=20; }
   y+=20;
   
   if (g.new_hi_score) {
@@ -149,6 +150,10 @@ void modal_update(double elapsed) {
     case MODAL_UPDATE_NEXT_LEVEL: {
         g.fishc_total+=g.fishc_level;
         g.fishc_level=0;
+        if (g.bonus) {
+          if (g.bonus_ok) g.bonusc_total++;
+          g.bonusc_possible++;
+        }
         if (game_start_level(g.mapid+1)<0) {
           gameover_begin();
         }

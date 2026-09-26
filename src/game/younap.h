@@ -24,6 +24,7 @@ extern struct g {
   struct graf graf;
   int input[INPUT_LIMIT],pvinput[INPUT_LIMIT];
   int bgtexid; // Map image and scratch marks.
+  int fishc_possible; // Collected during initial ROM scan.
   
   /* Single tilesheet, and just one interesting table.
    */
@@ -43,6 +44,10 @@ extern struct g {
   double all_sleep_time; // For how long have they all been asleep? Win after a short interval, say one second.
   int mrrrdr; // Nonzero if a cat has died. Transient.
   int fishc_level; // How many fish caught this level. Resets if you die, commits when you win the level.
+  int jumpc_level;
+  double climbtime_level;
+  int bonus; // NS_bonus_*, which condition is this map's bonus. Zero=none.
+  int bonus_ok; // Nonzero during level report if bonus was awarded.
   
   /* Windows come straight off the map: CMD_map_window.
    */
@@ -69,6 +74,8 @@ extern struct g {
   double time_total;
   int deathc_total;
   int fishc_total;
+  int bonusc_total;
+  int bonusc_possible;
   char rptscore[6]; // Populated at start of Game Over.
   char rpttime[12]; // ''
   int rpttimec; // 0,8,9,11,12
@@ -94,6 +101,7 @@ void render_level_report();
 void render_string_centered(int y,const char *src,int srcc);
 void render_kv(int y,const char *k,int kc,const char *v,int vc);
 void render_kv_int(int y,const char *k,int kc,int v);
+void render_kv_int2(int y,const char *k,int kc,int numer,int denom);
 void render_kv_time(int y,const char *k,int kc,double s);
 
 // game.c
@@ -103,6 +111,7 @@ void game_reset_scores();
 int time_repr(char *dst,int dsta,double s,int full);
 int decsint_repr(char *dst,int dsta,int v);
 int game_start_level(int mapid);
+void check_bonus(); // Sets (g.bonus_ok) if warranted.
 
 // sunlight.c
 void advance_sun(double elapsed); // May start a new level.
