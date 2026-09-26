@@ -25,17 +25,7 @@ static int _fish_init(struct sprite *sprite) {
   return 0;
 }
 
-static void fish_animate(struct sprite *sprite,double elapsed) {
-  if ((SPRITE->animclock-=elapsed)<=0.0) {
-    SPRITE->animclock+=FRAME_INTERVAL;
-    if (++(SPRITE->animframe)>=FRAMEC) SPRITE->animframe=0;
-    sprite->tileid=SPRITE->tileid0+FRAMEC;
-  }
-}
-
 static void _fish_update(struct sprite *sprite,double elapsed) {
-  fish_animate(sprite,elapsed);
-  
   struct sprite **catp=spritev; // ew cat pee
   int cati=spritec;
   for (;cati-->0;catp++) {
@@ -53,21 +43,9 @@ static void _fish_update(struct sprite *sprite,double elapsed) {
   }
 }
 
-static void _fish_update_bg(struct sprite *sprite,double elapsed) {
-  fish_animate(sprite,elapsed);
-}
-
-//XXX Delete this once tiles are available.
-static void _fish_render(struct sprite *sprite,int x,int y) {
-  const uint32_t colorv[4]={0x800000ff,0x804000ff,0x808000ff,0x804000ff};
-  graf_fill_rect(&g.graf,x-4,y-4,8,8,colorv[SPRITE->animframe]);
-}
-
 const struct sprite_type sprite_type_fish={
   .name="fish",
   .objlen=sizeof(struct sprite_fish),
   .init=_fish_init,
   .update=_fish_update,
-  .update_bg=_fish_update_bg,
-  .render=_fish_render,
 };
