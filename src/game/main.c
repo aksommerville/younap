@@ -100,6 +100,24 @@ static int game_interactive() {
   return 1;
 }
 
+/* Update sprites.
+ */
+ 
+static void update_sprites(int fg,double elapsed) {
+  struct sprite **spritep=spritev;
+  int spritei=spritec;
+  for (;spritei-->0;spritep++) {
+    struct sprite *sprite=*spritep;
+    if (sprite->defunct) continue;
+    if (fg) {
+      if (sprite->type->update) sprite->type->update(sprite,elapsed);
+    } else {
+      if (sprite->type->update_bg) sprite->type->update_bg(sprite,elapsed);
+    }
+  }
+  sprites_reap();
+}
+
 /* Update.
  */
 
@@ -169,18 +187,10 @@ void egg_client_update(double elapsed) {
     advance_sun(elapsed);
     regenerate_spots();
     require_cat_inputs();
-  
-    // Update sprites, then reap the defunct ones.
-    struct sprite **spritep=spritev;
-    int spritei=spritec;
-    for (;spritei-->0;spritep++) {
-      struct sprite *sprite=*spritep;
-      if (sprite->defunct) continue;
-      if (sprite->type->update) sprite->type->update(sprite,elapsed);
-    }
-    sprites_reap();
-    
+    update_sprites(1,elapsed);
     check_level_completion(elapsed);
+  } else {
+    update_sprites(0,elapsed);
   }
 }
 

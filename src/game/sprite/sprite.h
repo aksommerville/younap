@@ -33,7 +33,11 @@ struct sprite_type {
    */
   int (*init)(struct sprite *sprite);
   
+  /* (update_bg) is called while a modal is displayed over the game.
+   * Don't change any meaningful state during bg. But it's good to animate if it makes sense to.
+   */
   void (*update)(struct sprite *sprite,double elapsed);
+  void (*update_bg)(struct sprite *sprite,double elapsed);
   void (*render)(struct sprite *sprite,int x,int y);
 };
 

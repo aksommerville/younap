@@ -374,6 +374,10 @@ static void _cat_update(struct sprite *sprite,double elapsed) {
   cat_animate(sprite,elapsed);
 }
 
+static void _cat_update_bg(struct sprite *sprite,double elapsed) {
+  cat_animate(sprite,elapsed);
+}
+
 /* Render artificial power meters.
  */
  
@@ -482,6 +486,7 @@ const struct sprite_type sprite_type_cat={
   .del=_cat_del,
   .init=_cat_init,
   .update=_cat_update,
+  .update_bg=_cat_update_bg,
   .render=_cat_render,
 };
 
