@@ -26,7 +26,7 @@ int sprite_move(struct sprite *sprite,double dx,double dy) {
    */
   const double hbl=-0.5;
   const double hbr= 0.5;
-  const double hbt=-0.5;
+  const double hbt=-0.250;
   const double hbb= 0.5;
   
   /* Eagerly take the entire step.
