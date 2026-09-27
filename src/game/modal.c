@@ -16,6 +16,16 @@ void hello_begin() {
   play_song(RID_song_noodlecat);
 }
 
+/* Snoozles for the hello cats.
+ */
+ 
+static void hello_snoozle(int x,int y,int p) {
+  y=FBH-300+y;
+  p=(p+g.hello_frame)&15;
+  int srcx=p*32;
+  graf_decal_rotate(&g.graf,x,y,srcx,256,32,0.0,1.0,2.0);
+}
+
 /* Render Hello.
  */
  
@@ -28,7 +38,17 @@ void hello_render() {
   graf_set_image(&g.graf,RID_image_titletext);
   graf_decal(&g.graf,(FBW>>1)-135,30,0,0,270,240);
   
-  // I'd like to render the cats and snores as tiles so we can animate them. But the static ones are scaled up.
+  /* Snoozles for the cats in the background image.
+   */
+  graf_set_image(&g.graf,RID_image_sprites);
+  hello_snoozle(480,-140, 9);
+  hello_snoozle( 67,102, 4);
+  hello_snoozle(192,222, 6);
+  hello_snoozle(323,222, 1);
+  hello_snoozle(502,222,10);
+  hello_snoozle(563,222, 5);
+  hello_snoozle(839,222, 3);
+  hello_snoozle(906,222,12);
   
   /* Show best score and time if present.
    */
@@ -174,8 +194,13 @@ void modal_update(double elapsed) {
   int result=0;
   if (g.level_intro) result=modal_update_1(&g.level_intro,elapsed);
   else if (g.level_report) result=modal_update_1(&g.level_report,elapsed);
-  else if (g.hello) result=modal_update_1(&g.hello,elapsed);
-  else if (g.gameover) {
+  else if (g.hello) {
+    result=modal_update_1(&g.hello,elapsed);
+    if ((g.hello_clock-=elapsed)<=0.0) {
+      g.hello_clock+=0.100;
+      if (++(g.hello_frame)>=16) g.hello_frame=0;
+    }
+  } else if (g.gameover) {
     result=modal_update_1(&g.gameover,elapsed);
     g.gameover_clock+=elapsed;
     if (g.gameover_tempo>0.0) {

@@ -27,4 +27,3 @@ score 0x0a00
 sprite @28,1 sprite:fish (u32)0
 sprite @1,1 sprite:fish (u32)0
 bonus (u16:bonus)same_sunbeam
-mapmsg "share_a_window"

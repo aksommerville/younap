@@ -17,9 +17,8 @@
 image image:sprites
 window @18,6 2 2
 sprite @3,10 sprite:binx (u32)0
-song song:sosweetsox
+song song:great_trouble
 sunrate 0x1000
 score 0x0500
 sprite @26,4 sprite:fish (u32)0
 bonus (u16:bonus)no_climb
-mapmsg "wee_pit"

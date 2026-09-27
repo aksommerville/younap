@@ -15,5 +15,6 @@ Guide the cats to the sunbeams so they can take a nap.
 - - Delete save file, then do an all-out speed run, should be 20 s or so. Then do a 100% run without restarting the program.
 - [x] Separate Any% and 100% times for reporting.
 - [x] Provisional level set.
-- [ ] Final level set.
-- [ ] Final graphics and sound.
+- [x] Final level set.
+- [x] Final graphics and sound.
+- [x] hello snoozles

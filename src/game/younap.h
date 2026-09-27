@@ -71,6 +71,8 @@ extern struct g {
   double gameover_clock;
   double gameover_headt;
   double gameover_tempo; // bobble period in seconds
+  double hello_clock;
+  int hello_frame;
   
   /* Session score.
    * Resets when dismissing Hello.

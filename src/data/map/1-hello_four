@@ -24,4 +24,3 @@ sprite @25,6 sprite:fish (u32)0
 song song:great_trouble
 sunrate 0x0800
 score 0x0a00
-mapmsg "hello_four"
